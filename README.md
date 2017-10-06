@@ -33,7 +33,7 @@ Installation Guide
 	- Copy [sketches], [hardware] and [libraries] directories to arduino's sketchbook direcotry
 	- Restart Arduino, you will see new board from [Tools]->[Border] menu.
 
-4. about arduino's sketchbook directory:
+= About arduino's sketchbook directory:
 -----------------------------------------------
 	You can always find this directory from [File]->[Preferences] menu.
 	Here is the default sketchbook directory for most popluar system:
