@@ -163,6 +163,7 @@ static const uint8_t A11 = 26;
 #define	D39	39	/* PF7 */
 #define OC3C 35 /* PF3 for OC3C */
 #define D40 35	/* PF3 for OC3C */
+#define D41 41  /* C3AAC for OC3A */
 #else
 #define E0	22
 #define E2	23
@@ -453,6 +454,7 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 	TIMER2AX,	  /* 38 - F6 */
 	TIMER2BX,	  /* 39 - F7 */
 	TIMER3C,	  /* 40 - F3 for OC3C */
+	TIMER3AA,	  /* 41 - OC3A/ACO */
 #elif defined(__LGT8FX8P32__)
 	NOT_ON_TIMER, /* 22 - E0 */
 	NOT_ON_TIMER, /* 23 - E2 */

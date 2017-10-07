@@ -239,6 +239,7 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #define TIMER2BX  24
 #define TIMER3AX  25
 #define TIMER3BX  26
+#define TIMER3AA  27
 
 #define LGTDAO0	80
 #define LGTDAO1	81

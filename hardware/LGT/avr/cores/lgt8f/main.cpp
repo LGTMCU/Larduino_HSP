@@ -47,9 +47,8 @@ void unlockWrite(volatile uint8_t *p, uint8_t val)
 {
 	volatile uint8_t *cp = p; 
 
-	if(p == &PMX1) {
+	if(p == &PMX1)
 		cp = &PMX0;
-	}
 
 	*cp = 0x80;
 	*p = val;
