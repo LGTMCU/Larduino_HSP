@@ -140,9 +140,10 @@ void pinMode(uint8_t, uint8_t);
 void digitalWrite(uint8_t, uint8_t);
 int digitalRead(uint8_t);
 void digitalToggle(uint8_t);
+void pwmWrite(uint8_t, uint16_t);
 int analogRead(uint8_t);
 void analogReference(uint8_t mode);
-void analogWrite(uint8_t, int);
+void analogWrite(uint8_t, uint16_t);
 void analogReadResolution(uint8_t);
 
 unsigned long millis(void);
@@ -242,6 +243,9 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #define LGTDAO0	80
 #define LGTDAO1	81
 
+void unlockWrite(volatile uint8_t *, uint8_t);
+void atomicWriteWord(volatile uint8_t *, uint16_t);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
@@ -272,6 +276,11 @@ long random(long, long);
 void randomSeed(unsigned long);
 long map(long, long, long, long, long);
 
+
+#define FREQ_BOOST 1
+#define FREQ_NORMAL 0
+uint16_t pwmFrequency(uint8_t pin, uint32_t fhz, uint8_t fmode = FREQ_NORMAL);
+
 #endif
 
 #include "pins_arduino.h"
@@ -279,7 +288,8 @@ long map(long, long, long, long, long);
 #if defined(__LGT8FX8E__) || defined(__LGT8FX8P__)
 #define	INT_OSC	0
 #define	EXT_OSC	1
-void sysClock(uint8_t);
+void sysClock(uint8_t mode);
+
 #endif
 
 #ifndef nop

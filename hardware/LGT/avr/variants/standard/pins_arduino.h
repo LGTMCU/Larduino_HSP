@@ -420,7 +420,6 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 #endif
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
-	NOT_ON_TIMER,
 	NOT_ON_TIMER, /* 14 - port C */
 	NOT_ON_TIMER,
 	NOT_ON_TIMER,
@@ -433,6 +432,7 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 #else
 	NOT_ON_TIMER, /* 21  E3 */
 #endif
+// Log(HSP v3.7): for additional PWM output
 #if defined(__LGT8FX8P48__)
 	NOT_ON_TIMER, /* 22 - B6 */
 	NOT_ON_TIMER, /* 23 - C7 */
@@ -460,6 +460,7 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
 	TIMER1AX,	  /* 25 - E5 */
 	NOT_ON_TIMER, /* 26 - E6 */		
 #endif
+// Log(HSP v3.7): END
 };
 
 #endif /* ARDUINO_MAIN */

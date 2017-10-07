@@ -289,20 +289,27 @@ void init()
 #if defined(TCCR1B) && defined(CS11) && defined(CS10)
 	TCCR1B = 0;
 
-	// set timer 1 prescale factor to 64
-	sbi(TCCR1B, CS11);
-#if F_CPU >= 8000000L
+	// Log(HSP v3.7): set timer 1 clock w/o prescaler
+	//  - to compatible with standard android, timer1 will be work in
+	//  - 16bit resoultion mode, we given a proper TOP (=ICR1) to 
+	//  - make it start from a standard status (compatible mode). 
+	//  - but we can also use pwmFrequencey() to change its frequency.
 	sbi(TCCR1B, CS10);
-#endif
+
 #elif defined(TCCR1) && defined(CS11) && defined(CS10)
-	sbi(TCCR1, CS11);
-#if F_CPU >= 8000000L
 	sbi(TCCR1, CS10);
 #endif
+
+	// put timer 1 PWM mode10 (phase correct pwm mode)
+#if defined(TCCR1A) && defined(WGM10) && defined(WGM12)
+	sbi(TCCR1B, WGM13);
+	sbi(TCCR1A, WGM11);
 #endif
-	// put timer 1 in 8-bit phase correct pwm mode
-#if defined(TCCR1A) && defined(WGM10)
-	sbi(TCCR1A, WGM10);
+
+// TOP = (ICR1 = 0x3FFF) @SYSCLK V.S (TOP = 0xFF) @ SYSCLK/64
+#if defined(ICR1) || defined(ICR1H)
+	ICR1H = 0x3f;
+	ICR1L = 0xff;
 #endif
 
 	// set timer 2 prescale factor to 64
@@ -324,9 +331,17 @@ void init()
 #endif
 
 #if defined(TCCR3B) && defined(CS31) && defined(WGM30)
-	sbi(TCCR3B, CS31);		// set timer 3 prescale factor to 64
+	// Log(HSP v3.7): 
+	//  - 1. using system clock directly w/o prescale for timer 3
+	//	- 2. using PWM mode10: 16bit, phase correct with TOP = ICR3
 	sbi(TCCR3B, CS30);
-	sbi(TCCR3A, WGM30);		// put timer 3 in 8-bit phase correct pwm mode
+	sbi(TCCR3B, WGM33);		// WGM3 = 0b1010
+	sbi(TCCR3A, WGM31);		// put timer 3 in 16-bit phase correct pwm mode
+#if defined(ICR3L) || defined(ICR3)
+	//ICR3H = 0x00;
+	ICR3 = 0xFF;			// initial pwm frequency : 16MHz/256 = 62.5KHz
+	// Log(HSP v3.7): END
+#endif
 #endif
 
 #if defined(TCCR4A) && defined(TCCR4B) && defined(TCCR4D) /* beginning of timer4 block for 32U4 and similar */

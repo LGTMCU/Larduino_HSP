@@ -305,6 +305,7 @@ Description : Original version.
 #define TCNT3L	(*((volatile unsigned char *)0x94))
 #define TCNT3H	(*((volatile unsigned char *)0x95))
 
+#define ICR3	(*((volatile unsigned char *)0x96))
 #define ICR3L	(*((volatile unsigned char *)0x96))
 #define ICR3H	(*((volatile unsigned char *)0x97))
 

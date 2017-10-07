@@ -17,7 +17,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #include <avr/wdt.h>
-#include <Arduino.h>
+//#include <Arduino.h>
+#include <wiring_private.h>
 
 // Declared weak in Arduino.h to allow user redefinitions.
 int atexit(void (* /*func*/ )()) { return 0; }
@@ -40,6 +41,29 @@ void __patch_wdt(void)
 	wdt_disable();
 }
 #endif
+
+//#pragma __attribute__(always_inline)
+void unlockWrite(volatile uint8_t *p, uint8_t val)
+{
+	volatile uint8_t *cp = p; 
+
+	if(p == &PMX1) {
+		cp = &PMX0;
+	}
+
+	*cp = 0x80;
+	*p = val;
+}
+
+void atomicWriteWord(volatile uint8_t *p, uint16_t val)
+{
+	uint8_t _sreg_bk = SREG;
+	cli();
+	*(p+1) = (uint8_t)(val >> 8);
+	nop();
+	*p = (uint8_t)val;
+	SREG = _sreg_bk;
+}
 
 void sysClock(uint8_t mode)
 {
@@ -76,6 +100,55 @@ void sysClock(uint8_t mode)
 		PMCR = GPIOR0;
 	}
 }	
+
+// Log(HSP v3.7): enhanced PWM settings
+// Function:
+//	- set PWM frequency (unit: Hz), return maximum duty cycle 
+// Note: 
+//	- only PWM Timer1/Timer3 support frequency update
+#if defined(__LGT8FX8P__) || defined(__LGT8FX8E__)
+uint16_t pwmFrequency(uint8_t pin, uint32_t fhz, uint8_t fmode)
+{
+	uint16_t value = (uint16_t) ((F_CPU >> 1) / fhz);
+
+	switch(digitalPinToTimer(pin)) {
+		case TIMER1A:
+		case TIMER1AX:
+		case TIMER1B:
+		case TIMER1BX:
+			atomicWriteWord(&ICR1L, value);		
+			if(fmode == FREQ_BOOST) {
+				sbi(TCKCSR, F2XEN);
+				delayMicroseconds(10);
+				sbi(TCKCSR, TC2XS1);
+			} else if(bit_is_set(TCKCSR, TC2XS1)) {
+				cbi(TCKCSR, TC2XS1);
+				delayMicroseconds(10);
+				cbi(TCKCSR, F2XEN);
+			}
+			break;
+		case TIMER2A:
+		case TIMER2AX:
+		case TIMER2B:
+		case TIMER2BX:
+			// TIMER8 is 8bit only, recommendded to leave it as default:
+			// - frequency = 16000000/(64 * 256) = 976.5Hz
+			// TODO: Maybe it's good idea to make a possibility to modify its prescale
+			// - so we can get a littler more faster or slower frequency
+			break;
+		case TIMER3A:
+		case TIMER3AX:
+		case TIMER3B:
+		case TIMER3BX:
+		case TIMER3C:
+			atomicWriteWord(&ICR3L, value);
+			break;
+		default: break;
+	}
+
+	return value;
+}
+#endif
 
 void lgt8fx8x_init()
 {
@@ -137,4 +210,3 @@ int main(void)
         
 	return 0;
 }
-
