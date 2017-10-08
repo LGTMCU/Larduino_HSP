@@ -9,15 +9,15 @@
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-PWM             KEYWORD2
-pwmMode         KEYWORD2
-pwmWrite	    KEYWORD2
-pwmFrequency	KEYWORD2
-pwmTurnOff      KEYWORD2
-startTick       KEYWORD2
-stopTick    	KEYWORD2
-sysClock        KEYWORD2
-digtialToggle   KEYWORD2
+PWM             KEYWORD1
+pwmMode         KEYWORD1
+pwmWrite        KEYWORD1
+pwmFrequency    KEYWORD1
+pwmTurnOff      KEYWORD1
+startTick       KEYWORD1
+stopTick        KEYWORD1
+sysClock        KEYWORD1
+digtialToggle   KEYWORD1
 
 #######################################
 # Constants (LITERAL1)

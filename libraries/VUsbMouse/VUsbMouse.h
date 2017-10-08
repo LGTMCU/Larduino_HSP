@@ -70,7 +70,9 @@ public:
 	void begin() {
     		uchar   i;
 
-		TIMSK0 = 0;
+        // stop system tick interrupter
+        //TIMSK0 = 0;
+        stopTick();
 
 		memset(&reportBuffer, 0, sizeof(reportBuffer));
     

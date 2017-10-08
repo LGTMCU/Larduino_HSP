@@ -124,7 +124,9 @@ class VUsbKeyboardDevice {
   void begin () {
 	uchar i;
 
-	TIMSK0 = 0;
+  // stop system tick interrupter 
+  //TIMSK0 = 0;
+  stopTick();
     
 	usbInit();
       

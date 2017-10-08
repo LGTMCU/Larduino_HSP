@@ -61,7 +61,7 @@ void atomicWriteWord(volatile uint8_t *p, uint16_t val)
 	uint8_t _o_sreg = SREG;
 
 	cli();
-	*(p+1) = (uint8_t)(val >> 8);
+	*(p + 1) = (uint8_t)(val >> 8);
 	nop(); nop(); nop();
 	*p = (uint8_t)val;
 	SREG = _o_sreg;
@@ -199,14 +199,23 @@ void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode, uint8_t dband)
 //	- only PWM Timer1/Timer3 support frequency update
 uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
 {
-	uint16_t icrx;
-	uint8_t csxs;
+	uint16_t icrx = 0;
+	uint8_t csxs = 0;
 	volatile uint8_t *pICRX = 0;
 
 	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
 
 	// timer 0 working in FPWM mode which TOP is fixed to 0xFF
-	// so we can only change its prescale to set frequency range (fast/normal/slow)
+	// so we can change its prescale to set frequency range (fast/normal/slow)
+	// fast mode: 
+	//		- max = 16000000/(1*256) = 62.5K, support boost up to 62.5x4 = 250KHz
+	//		- min = 16000000/(256*256) = 244Hz, support boost up to 976Hz
+	// normal mode:
+	//		- max = 16000000/(64*256) = 976Hz, support boost up to 3.9KHz
+	//		- min = 16000000/(256*64*256) = 3.8Hz, support boost up to 15.2Hz
+	// slow mode:
+	//		- max = 16000000/(1024*256) = 61Hz
+	//		- min = 16000000/(256*1024*256) = 0.238Hz
 
 	if(timer == TIMER1) { // TIMER1
 		pICRX = &ICR1L;

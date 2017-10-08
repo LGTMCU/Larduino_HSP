@@ -25,8 +25,9 @@ public:
   void begin() {
     uchar   i;
 
-    // disable timer 0 overflow interrupt (used for millis)
-    TIMSK0 = 0;
+    // disable system tick interrupt (used for millis)
+    //TIMSK0 = 0;
+    stopTick();
 
     usbInit();
       
