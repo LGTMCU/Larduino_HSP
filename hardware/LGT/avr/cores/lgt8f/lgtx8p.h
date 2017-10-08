@@ -319,6 +319,8 @@ Description : Original version.
 
 #define DTR3A	(*((volatile unsigned char *)0x9C))
 #define DTR3B	(*((volatile unsigned char *)0x9D))
+#define DTR3L	(*((volatile unsigned char *)0x9C))
+#define DTR3H	(*((volatile unsigned char *)0x9D))
 
 #define OCR3C	(*((volatile unsigned char *)0x9E))
 #define OCR3CL	(*((volatile unsigned char *)0x9E))

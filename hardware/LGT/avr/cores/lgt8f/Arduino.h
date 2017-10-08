@@ -212,11 +212,13 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #endif
 
 #define NOT_ON_TIMER 0x00
+#define TIMER0    0x10
 #define TIMER0A   0x10
 #define TIMER0B   0x11
 #define TIMER0AX  0x12
 #define TIMER0BX  0x13
 
+#define TIMER1    0x20
 #define TIMER1A   0x20
 #define TIMER1B   0x21
 #define TIMER1C   0x22
@@ -229,6 +231,7 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #define TIMER2AX  0x33
 #define TIMER2BX  0x34
 
+#define TIMER3    0x40
 #define TIMER3A   0x40
 #define TIMER3B   0x41
 #define TIMER3C   0x42
@@ -236,10 +239,13 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #define TIMER3BX  0x44
 #define TIMER3AA  0x45
 
+#define TIMER4    0x50
 #define TIMER4A   0x50
 #define TIMER4B   0x51
 #define TIMER4C   0x52
 #define TIMER4D   0x53
+
+#define TIMER5    0x60
 #define TIMER5A   0x60
 #define TIMER5B   0x61
 #define TIMER5C   0x62
@@ -283,15 +289,14 @@ long map(long, long, long, long, long);
 // PWM workong mode and frequency settings
 uint16_t pwmFrequency(uint8_t pin, uint32_t fhz);
 
-#define PWM_MODE_NORMAL   0x00
-#define PWM_MODE_COMPM0   0x80
-#define PMW_MODE_COMPM1   0x81
-#define PMW_MODE_COMPM2   0x82
-#define PMW_MODE_COMPM3   0x83
+#define PWM_MODE_NORMAL   0x80
+#define PWM_MODE_COMPM0   0x00
+#define PWM_MODE_COMPM1   0x10
 
 #define PWM_FREQ_BOOST    0x80
-#define PWM_FREQ_SLOW     0x00
 #define PWM_FREQ_FAST     0x01
+#define PWM_FREQ_NORMAL   0x03
+#define PWM_FREQ_SLOW     0x05
 void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode = PWM_FREQ_FAST, uint8_t dband = 0);
 
 #endif

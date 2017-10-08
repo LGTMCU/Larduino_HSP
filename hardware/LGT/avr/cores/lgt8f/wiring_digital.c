@@ -294,42 +294,42 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		case TIMER0A:
 			// connect pwm to pin on timer 0
 			sbi(TCCR0, COM00);
-			OCR0 = val; // set pwm duty
+			OCR0 = (uint8_t)val; // set pwm duty
 			break;
 		#endif
 
 		#if defined(TCCR0A) && defined(COM0A1)
 		case TIMER0A: // D6
 			// connect pwm to pin on timer 0, channel A
-			cbi(TCCR0B, OC0AS);
-			OCR0A = val; // set pwm duty
+			OCR0A = (uint8_t)val; // set pwm duty
 			sbi(TCCR0A, COM0A1);
+			cbi(TCCR0B, OC0AS);	//*****
 			sbi(DDRD, PD6);
 			break;
 		#if defined(__LGTF8XP48__)			
 		case TIMER0AX: // E4
-			sbi(TCCR0B, OC0AS);
-			OCR0A = val;						
+			OCR0A = (uint8_t)val;						
 			sbi(TCCR0A, COM0A1);
+			sbi(TCCR0B, OC0AS);	 //*****
 			sbi(DDRE, PE4);
 			break;
 		#endif
 		#endif
 		#if defined(TCCR0A) && defined(COM0B1)
 		case TIMER0B: // D5
-			// connect pwm to pin on timer 0, channel B
-		#if defined(__LGTF8XP48__)
+			// connect pwm to pin on timer 0, channel B			
+			OCR0B = (uint8_t)val; // set pwm duty			
+			sbi(TCCR0A, COM0B1);				
+			#if defined(__LGTF8XP48__)
 			unlockWrite(&PMX0, (PMX0 & ~_BV(C0BF3)));
-		#endif					
-			OCR0B = val; // set pwm duty			
-			sbi(TCCR0A, COM0B1);
+			#endif					
 			sbi(DDRD, PD5);
 			break;
 		#if defined(__LGTF8XP48__)
 		case TIMER0BX: // F3
-			unlockWrite(&PMX0, (PMX0 | _BV(C0BF3)));
-			OCR0B = val;
+			OCR0B = (uint8_t)val;
 			sbi(TCCR0A, COM0B1);
+			unlockWrite(&PMX0, (PMX0 | _BV(C0BF3)));
 			sbi(DDRF, PF3);
 			break;
 		#endif
@@ -338,9 +338,9 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(TCCR1A) && defined(COM1A1)
 		case TIMER1A: // B1
 			// connect pwm to pin on timer 1, channel A
-			sbi(TCCR1A, COM1A1);
 			//OCR1A = val; // set pwm duty
 			atomicWriteWord(&OCR1AL, val);
+			sbi(TCCR1A, COM1A1);
 			#if defined(__LGT8FX8P__)	
 			unlockWrite(&PMX0, (PMX0 & ~_BV(C1AF5)));
 			sbi(DDRB, PB2);
@@ -353,9 +353,9 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined (__LGT8FX8P32__)
 			cbi(DDRE, PE5);
 		#endif	
-			sbi(TCCR1A, COM1A1);
 			//OCR1A = val;
 			atomicWriteWord(&OCR1AL, val);
+			sbi(TCCR1A, COM1A1);
 			unlockWrite(&PMX0, (PMX0 | _BV(C1AF5)));
 			sbi(DDRF, PF5);			
 		#endif	
@@ -364,9 +364,9 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(TCCR1A) && defined(COM1B1)
 		case TIMER1B: // B2
 			// connect pwm to pin on timer 1, channel B			
-			sbi(TCCR1A, COM1B1);
 			//OCR1B = val; // set pwm duty
 			atomicWriteWord(&OCR1BL, val);
+			sbi(TCCR1A, COM1B1);
 			#if defined(__LGT8FX8P__)
 			unlockWrite(&PMX0, (PMX0 & ~_BV(C1BF4)));		
 			sbi(DDRB, PB2);
@@ -380,10 +380,10 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(__LGT8FX8P32__)
 			cbi(DDRE, PE4);
 		#endif
-			unlockWrite(&PMX0, (PMX0 | _BV(C1BF4)));
 			//OCR1B = val;
 			atomicWriteWord(&OCR1BL, val);
 			sbi(TCCR1A, COM1B1);			
+			unlockWrite(&PMX0, (PMX0 | _BV(C1BF4)));
 			sbi(DDRF, PF4);	
 			break;
 		#endif
@@ -400,18 +400,18 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(TCCR2A) && defined(COM2A1)
 		case TIMER2A: // B3
 			// connect pwm to pin on timer 2, channel A
-		#if defined(__LGT8FX8P48__)
-			unlockWrite(&PMX1, (PMX1 & ~_BV(C2AF6)));
-		#endif
 			OCR2A = (uint8_t)val; // set pwm duty
 			sbi(TCCR2A, COM2A1);			
+			#if defined(__LGT8FX8P48__)
+			unlockWrite(&PMX1, (PMX1 & ~_BV(C2AF6)));
+			#endif			
 			sbi(DDRB, PB3);			
 			break;
 		#if defined(__LGT8F8P48__)
 		case TIMER2AX: // F6
-			unlockWrite(&PMX1, (PMX1 | _BV(C2AF6)));
 			OCR2A = (uint8_t)val;			
 			sbi(TCCR2A, COM2A1);
+			unlockWrite(&PMX1, (PMX1 | _BV(C2AF6)));
 			sbi(DDRF, PF6);
 			break;
 		#endif	
@@ -419,19 +419,19 @@ void pwmWrite(uint8_t pin, uint16_t val)
 
 		#if defined(TCCR2A) && defined(COM2B1)
 		case TIMER2B: // D3
-			// connect pwm to pin on timer 2, channel B
-		#if defined(__LGT8FX8P48__)
-			unlockWrite(&PMX1, (PMX1 & ~_BV(C2BF7)));
-		#endif	
-			sbi(TCCR2A, COM2B1);
+			// connect pwm to pin on timer 2, channel B	
 			OCR2B = (uint8_t)val; // set pwm duty
+			sbi(TCCR2A, COM2B1);
+			#if defined(__LGT8FX8P48__)
+			unlockWrite(&PMX1, (PMX1 & ~_BV(C2BF7)));
+			#endif
 			sbi(DDRD, PD3);
 			break;
 		#if defined(__LGT8F8P48__)
 		case TIMER2BX: // F7
-			unlockWrite(&PMX1, (PMX1 | _BV(C2BF7)));
 			OCR2B = (uint8_t)val;
 			sbi(TCCR2A, COM2B1);
+			unlockWrite(&PMX1, (PMX1 | _BV(C2BF7)));
 			sbi(DDRF, PF7);
 			break;
 		#endif
@@ -448,14 +448,14 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			break;
 		#if defined(__LGT8FX8P48__)
 		case TIMER3AX: // F1 standalone
-			unlockWrite(&PMX1, (PMX1 & ~_BV(C3AC)));
 			atomicWriteWord(&OCR3AL, val);
 			sbi(TCCR3A, COM3A1);
+			unlockWrite(&PMX1, (PMX1 & ~_BV(C3AC)));
 			sbi(DDRF, PF1);
 			break;
 		case TIMER3AA: // OC3A/ACO standalone
-			unlockWrite(&PMX1, (PMX1 | _BV(C3AC)));
 			atomicWriteWord(&OCR3AL, val);
+			unlockWrite(&PMX1, (PMX1 | _BV(C3AC)));
 			sbi(TCCR3A, COM3A1);
 			break;
 		#endif	
@@ -468,9 +468,9 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			cbi(DDRD, PD2);
 		#endif
 			// connect pwm to pin on timer 3, channel B
-			sbi(TCCR3A, COM3B1);
 			//OCR3B = val; // set pwm duty
 			atomicWriteWord(&OCR3BL, val);
+			sbi(TCCR3A, COM3B1);
 			sbi(DDRF, PF2);
 			break;
 		#endif
@@ -479,9 +479,9 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(TCCR3A) && defined(COM3C1)
 		case TIMER3C: // F3 
 			// connect pwm to pin on timer 3, channel C
-			sbi(TCCR3A, COM3C1);
 			//OCR3C = val; // set pwm duty
 			atomicWriteWord(&OCR3CL, val);
+			sbi(TCCR3A, COM3C1);
 			sbi(DDRF, PF3);
 			break;
 		#endif

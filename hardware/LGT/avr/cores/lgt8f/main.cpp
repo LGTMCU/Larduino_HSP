@@ -62,7 +62,7 @@ void atomicWriteWord(volatile uint8_t *p, uint16_t val)
 
 	cli();
 	*(p+1) = (uint8_t)(val >> 8);
-	nop();
+	nop(); nop(); nop();
 	*p = (uint8_t)val;
 	SREG = _o_sreg;
 }
@@ -113,23 +113,52 @@ void sysClock(uint8_t mode)
 //		- PWM_MODE_COMPM2: complementary dual output 
 //		- PWM_MODE_COMPM3: complementary dual output (inverted)
 //	fmode: pwm frequency settings
-//		- PWM_FREQ_SLOWER: slow range
-//		- PWM_FREQ_FASTER: fast range 
+//		- PWM_FREQ_SLOW: slow range
+//		- PWM_FREQ_NORMAL: normal range
+//		- PWM_FREQ_FAST: fast range 
 //		- PWM_FREQ_BOOST: boost target frequency by x4
 //	dband: dead band settings
 //		- only valid for complementary working mode 
+// note:
+//		- Timer 2 is used for system tick, so don't touch!!
 void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode, uint8_t dband)
 {
+	volatile uint8_t *pTCCRX = 0;
+
 	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
 
-	if(timer == 0x10) {	// TIMER0
-		
-	} else if(timer == 0x20) { // TIMER1
-	} else if(timer == 0x30) { // TIMER2
-			// TIMER8 is 8bit only, default frequency = 16000000/(64 * 256) = 976.5Hz
-			// TODO: Maybe it's good idea to make a possibility to modify its prescale
-			// - so we can get a littler more faster or slower frequency
-	} else if(timer == 0x40) { // TIMER3
+	if(timer == TIMER0) { // TIMER0
+		pTCCRX = &TCCR0B;
+		if(wmode == PWM_MODE_NORMAL) {
+			cbi(TCCR0B, DTEN0);
+			cbi(TCCR0A, COM0B0);
+		} else {
+			sbi(TCCR0B, DTEN0);
+			TCCR0A = (TCCR0A & ~_BV(COM0B0)) | (wmode & 0x10);
+			DTR0 = ((dband & 0xf) << 4) | (dband & 0xf);
+		}
+
+		if((fmode & PWM_FREQ_BOOST) == PWM_FREQ_BOOST) {
+			// enable frequency boost (x4) mode
+			sbi(TCKCSR, F2XEN);
+			delayMicroseconds(10);
+			sbi(TCKCSR, TC2XS0);					
+		} else if(bit_is_set(TCKCSR, TC2XS0)) {
+			cbi(TCKCSR, TC2XS0);
+			delayMicroseconds(10);
+			cbi(TCKCSR, F2XEN);				
+		}
+	} else if(timer == TIMER1) { // TIMER1
+		pTCCRX = &TCCR1B;
+		if(wmode == PWM_MODE_NORMAL) {
+			cbi(TCCR1C, DTEN1);
+			cbi(TCCR1A, COM1B0);
+		} else {
+			sbi(TCCR1C, DTEN1);
+			TCCR1A = (TCCR1A & ~_BV(COM1B0)) | (wmode & 0x10);
+			DTR1L = dband;
+			DTR1H = dband;
+		}
 		if((fmode & PWM_FREQ_BOOST) == PWM_FREQ_BOOST) {
 			sbi(TCKCSR, F2XEN);
 			delayMicroseconds(10);
@@ -138,7 +167,28 @@ void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode, uint8_t dband)
 			cbi(TCKCSR, TC2XS1);
 			delayMicroseconds(10);
 			cbi(TCKCSR, F2XEN);
+		}		
+	} else if(timer == TIMER3) { // TIMER3
+		pTCCRX = &TCCR3B;
+		if(wmode == PWM_MODE_NORMAL) {
+			cbi(TCCR3C, DTEN3);
+			cbi(TCCR3A, COM3B0);
+		} else {
+			sbi(TCCR3C, DTEN3);
+			TCCR3A = (TCCR3A & ~_BV(COM3B0)) | (wmode & 0x10);
+			DTR3A = dband;
+			DTR3B = dband;
 		}
+	}
+
+	if(pTCCRX == 0) return;
+
+	if((fmode & 0x7f) == PWM_FREQ_SLOW) {
+		*pTCCRX = (*pTCCRX & 0xf8) | PWM_FREQ_SLOW;	// prescale = 1024 (slowest mode)
+	} else if((fmode & 0x7f) == PWM_FREQ_FAST) {
+		*pTCCRX = (*pTCCRX & 0xf8) | PWM_FREQ_FAST; // prescale = 1 (fastest mode)
+	} else if ((fmode & 0x7f) == PWM_FREQ_NORMAL) {
+		*pTCCRX = (*pTCCRX & 0xf8) | PWM_FREQ_NORMAL;	// prescale = 64 (default)
 	}
 }
 
@@ -149,17 +199,36 @@ void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode, uint8_t dband)
 //	- only PWM Timer1/Timer3 support frequency update
 uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
 {
-	uint16_t value = (uint16_t) ((F_CPU >> 1) / fhz);
+	uint16_t icrx;
+	uint8_t csxs;
+	volatile uint8_t *pICRX = 0;
 
 	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
 
-	if(timer == 0x20) {	// TIMER1
-			atomicWriteWord(&ICR1L, value);	
-	} else if(timer == 0x40) { // TIMER3
-			atomicWriteWord(&ICR3L, value);
+	// timer 0 working in FPWM mode which TOP is fixed to 0xFF
+	// so we can only change its prescale to set frequency range (fast/normal/slow)
+
+	if(timer == TIMER1) { // TIMER1
+		pICRX = &ICR1L;
+		csxs = TCCR1B & 0x7;
+	} else if(timer == TIMER3) { // TIMER3
+		pICRX = &ICR3L;
+		csxs = TCCR3B & 0x7;
 	}
 
-	return value;
+	if(pICRX == 0) return 0xff;
+
+	if(csxs == PWM_FREQ_FAST) { // fast mode
+		icrx = (uint16_t) ((F_CPU >> 1) / fhz);
+	} else if(csxs == PWM_FREQ_NORMAL) { // normal mode
+		icrx = (uint16_t) ((F_CPU >> 7) / fhz);
+	} else if(csxs == PWM_FREQ_SLOW) { // slow mode
+		icrx = (uint16_t) ((F_CPU >> 11) / fhz);
+	}
+
+	atomicWriteWord(pICRX, icrx);
+
+	return icrx;
 }
 #endif
 

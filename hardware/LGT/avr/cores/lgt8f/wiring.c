@@ -22,33 +22,29 @@
 
 #include "wiring_private.h"
 
-// the prescaler is set so that timer0 ticks every 64 clock cycles, and the
+// the prescaler is set so that timer2 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
+#define MICROSECONDS_PER_TIMER2_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
 
-// the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
+// the whole number of milliseconds per timer2 overflow
+#define MILLIS_INC (MICROSECONDS_PER_TIMER2_OVERFLOW / 1000)
 
-// the fractional number of milliseconds per timer0 overflow. we shift right
+// the fractional number of milliseconds per timer2 overflow. we shift right
 // by three to fit these numbers into a byte. (for the clock speeds we care
 // about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
+#define FRACT_INC ((MICROSECONDS_PER_TIMER2_OVERFLOW % 1000) >> 3)
 #define FRACT_MAX (1000 >> 3)
 
-volatile unsigned long timer0_overflow_count = 0;
-volatile unsigned long timer0_millis = 0;
-static unsigned char timer0_fract = 0;
+volatile unsigned long timer2_overflow_count = 0;
+volatile unsigned long timer2_millis = 0;
+static unsigned char timer2_fract = 0;
 
-#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-ISR(TIM0_OVF_vect)
-#else
-ISR(TIMER0_OVF_vect)
-#endif
+ISR(TIMER2_OVF_vect)
 {
 	// copy these to local variables so they can be stored in registers
 	// (volatile variables must be read from memory on every access)
-	unsigned long m = timer0_millis;
-	unsigned char f = timer0_fract;
+	unsigned long m = timer2_millis;
+	unsigned char f = timer2_fract;
 
 	m += MILLIS_INC;
 	f += FRACT_INC;
@@ -57,9 +53,9 @@ ISR(TIMER0_OVF_vect)
 		m += 1;
 	}
 
-	timer0_fract = f;
-	timer0_millis = m;
-	timer0_overflow_count++;
+	timer2_fract = f;
+	timer2_millis = m;
+	timer2_overflow_count++;
 }
 
 unsigned long millis()
@@ -67,10 +63,10 @@ unsigned long millis()
 	unsigned long m;
 	uint8_t oldSREG = SREG;
 
-	// disable interrupts while we read timer0_millis or we might get an
-	// inconsistent value (e.g. in the middle of a write to timer0_millis)
+	// disable interrupts while we read timer2_millis or we might get an
+	// inconsistent value (e.g. in the middle of a write to timer2_millis)
 	cli();
-	m = timer0_millis;
+	m = timer2_millis;
 	SREG = oldSREG;
 
 	return m;
@@ -81,20 +77,20 @@ unsigned long micros() {
 	uint8_t oldSREG = SREG, t;
 	
 	cli();
-	m = timer0_overflow_count;
-#if defined(TCNT0)
-	t = TCNT0;
-#elif defined(TCNT0L)
-	t = TCNT0L;
+	m = timer2_overflow_count;
+#if defined(TCNT2)
+	t = TCNT2;
+#elif defined(TCNT2L)
+	t = TCNT2L;
 #else
-	#error TIMER 0 not defined
+	#error TIMER 2 not defined
 #endif
 
-#ifdef TIFR0
-	if ((TIFR0 & _BV(TOV0)) && (t < 255))
+#ifdef TIFR2
+	if ((TIFR2 & _BV(TOV2)) && (t < 255))
 		m++;
 #else
-	if ((TIFR & _BV(TOV0)) && (t < 255))
+	if ((TIFR & _BV(TOV2)) && (t < 255))
 		m++;
 #endif
 
@@ -227,7 +223,6 @@ void delayMicroseconds(unsigned int us)
 	// us is at least 4, divided by 4 gives us 1 (no zero delay bug)
 	us >>= 2; // us div 4, = 4 cycles
 	
-
 #endif
 
 	// busy wait
@@ -247,38 +242,23 @@ void init()
 	// on the ATmega168, timer 0 is also used for fast hardware pwm
 	// (using phase-correct PWM would mean that timer 0 overflowed half as often
 	// resulting in different millis() behavior on the ATmega8 and ATmega168)
+
+	// Log(HSP v3.7):
+	//  - to compatible with standard android, timer0 will be work in
+	//  - a PWM_FREQ_SLOW mode to compatible with standard arduino backend. 
+	//  - but we can also use pwmMode()/pwmFrequencey() to change its frequency.	
 #if defined(TCCR0A) && defined(WGM01)
 	sbi(TCCR0A, WGM01);
 	sbi(TCCR0A, WGM00);
 #endif
 
-	// set timer 0 prescale factor to 64
-#if defined(__AVR_ATmega128__)
-	// CPU specific: different values for the ATmega128
-	sbi(TCCR0, CS02);
-#elif defined(TCCR0) && defined(CS01) && defined(CS00)
-	// this combination is for the standard atmega8
-	sbi(TCCR0, CS01);
-	sbi(TCCR0, CS00);
-#elif defined(TCCR0B) && defined(CS01) && defined(CS00)
+	// set default timer 0 prescale factor to 64
+#if defined(TCCR0B) && defined(CS01) && defined(CS00)
 	// this combination is for the standard 168/328/1280/2560
 	sbi(TCCR0B, CS01);
 	sbi(TCCR0B, CS00);
-#elif defined(TCCR0A) && defined(CS01) && defined(CS00)
-	// this combination is for the __AVR_ATmega645__ series
-	sbi(TCCR0A, CS01);
-	sbi(TCCR0A, CS00);
 #else
 	#error Timer 0 prescale factor 64 not set correctly
-#endif
-
-	// enable timer 0 overflow interrupt
-#if defined(TIMSK) && defined(TOIE0)
-	sbi(TIMSK, TOIE0);
-#elif defined(TIMSK0) && defined(TOIE0)
-	sbi(TIMSK0, TOIE0);
-#else
-	#error	Timer 0 overflow interrupt not set correctly
 #endif
 
 	// timers 1 and 2 are used for phase-correct hardware pwm
@@ -321,13 +301,24 @@ void init()
 	// Timer 2 not finished (may not be present on this CPU)
 #endif
 
-	// configure timer 2 for phase correct pwm (8-bit)
+	// configure timer 2 for fast pwm mode (8-bit)
 #if defined(TCCR2) && defined(WGM20)
+	sbi(TCCR2, WGM21);
 	sbi(TCCR2, WGM20);
 #elif defined(TCCR2A) && defined(WGM20)
+	sbi(TCCR2A, WGM21);
 	sbi(TCCR2A, WGM20);
 //#else
 	// Timer 2 not finished (may not be present on this CPU)
+#endif
+
+	// enable timer 2 overflow interrupt
+#if defined(TIMSK) && defined(TOIE2)
+	sbi(TIMSK, TOIE2);
+#elif defined(TIMSK2) && defined(TOIE2)
+	sbi(TIMSK2, TOIE2);
+#else
+	#error	Timer 2 overflow interrupt not set correctly
 #endif
 
 #if defined(TCCR3B) && defined(CS31) && defined(WGM30)
