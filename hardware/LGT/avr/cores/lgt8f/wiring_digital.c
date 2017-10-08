@@ -34,6 +34,12 @@ void pinMode(uint8_t pin, uint8_t mode)
 	uint8_t port = digitalPinToPort(pin);
 	volatile uint8_t *reg, *out;
 
+	// Log(HSP v3.7): 
+	//  - turn off pwm output for we want to control i/o directly.
+	//  - note: analogWrite/pwmWrite will open i/o for output automatically.
+	pwmTurnOff(pin);
+	// Log(HSP v3.7): END
+
 #if defined(__LGT8FX8E__)
 	if(mode == ANALOG) {
 		if(pin == DAC0) {
@@ -103,40 +109,65 @@ void pinMode(uint8_t pin, uint8_t mode)
 //
 //static inline void turnOffPWM(uint8_t timer) __attribute__ ((always_inline));
 //static inline void turnOffPWM(uint8_t timer)
-static void turnOffPWM(uint8_t timer)
+static void __turnOffPWM(uint8_t timer)
 {
 	switch (timer)
 	{
 		#if defined(TCCR1A) && defined(COM1A1)
-		case TIMER1A:   cbi(TCCR1A, COM1A1);    break;
+		case TIMER1AX: 
+		#if defined(__LGT8FX8P32__)
+			cbi(DDRF, PF5); // turn/off i/o of PWM
+			sbi(DDRE, PE5); // turn/on i/o of user view
+		#endif
+		case TIMER1A: cbi(TCCR1A, COM1A1);    break;
 		#endif
 		#if defined(TCCR1A) && defined(COM1B1)
-		case TIMER1B:   cbi(TCCR1A, COM1B1);    break;
+		case TIMER1BX:
+		#if defined(__LGT8FX8P32__)
+			cbi(DDRF, PF4); // turn/off i/o of PWM
+			sbi(DDRE, PE4); // turn/on i/o of user view
+		#endif
+		case TIMER1B: cbi(TCCR1A, COM1B1);    break;
 		#endif
 		
 		#if defined(TCCR2) && defined(COM21)
-		case  TIMER2:   cbi(TCCR2, COM21);      break;
+		case  TIMER2: cbi(TCCR2, COM21);      break;
 		#endif
 		
 		#if defined(TCCR0A) && defined(COM0A1)
-		case  TIMER0A:  cbi(TCCR0A, COM0A1);    break;
-		#endif
-		
+		case TIMER0A:
+		case TIMER0AX: cbi(TCCR0A, COM0A1);    break;
+		#endif		
 		#if defined(TIMER0B) && defined(COM0B1)
-		case  TIMER0B:  cbi(TCCR0A, COM0B1);    break;
+		case TIMER0B:
+		case TIMER0BX: cbi(TCCR0A, COM0B1);    break;
 		#endif
+
 		#if defined(TCCR2A) && defined(COM2A1)
-		case  TIMER2A:  cbi(TCCR2A, COM2A1);    break;
+		case TIMER2AX:
+		case TIMER2A: cbi(TCCR2A, COM2A1);    break;
 		#endif
 		#if defined(TCCR2A) && defined(COM2B1)
-		case  TIMER2B:  cbi(TCCR2A, COM2B1);    break;
+		case TIMER2BX:
+		case TIMER2B: cbi(TCCR2A, COM2B1);    break;
 		#endif
 		
-		#if defined(TCCR3A) && defined(COM3A1)
-		case  TIMER3A:  cbi(TCCR3A, COM3A1);    break;
+		#if defined(TCCR3A) && defined(COM3A1)		
+		case  TIMER3A: // only for LGT8FX8P/QFP32/(SSOP20)?
+		#if defined(__LGT8FX8P32__)
+			cbi(DDRF, PF1);	// turn off i/o of pwm
+			sbi(DDRD, PD1); // turn on i/o of user view
+		#endif  
+		case TIMER3AX:
+		case TIMER3AA: cbi(TCCR3A, COM3A1);    break;
 		#endif
 		#if defined(TCCR3A) && defined(COM3B1)
-		case  TIMER3B:  cbi(TCCR3A, COM3B1);    break;
+		case TIMER3B: 
+		#if defined(__LGT8FX8P32__)
+			cbi(DDRF, PF2); // turn off i/o of pwm
+			sbi(DDRD, PD2); // turn on i/o of user view
+		#endif
+		case TIMER3BX: cbi(TCCR3A, COM3B1);    break;
 		#endif
 		#if defined(TCCR3A) && defined(COM3C1)
 		case  TIMER3C:  cbi(TCCR3A, COM3C1);    break;
@@ -163,9 +194,18 @@ static void turnOffPWM(uint8_t timer)
 	}
 }
 
-void digitalWrite(uint8_t pin, uint8_t val)
+// Log(HSP v3.7):
+// - turn off pwm output
+// - set i/o to proper driver state
+void pwmTurnOff(uint8_t pin)
 {
 	uint8_t timer = digitalPinToTimer(pin);
+	if(timer != NOT_ON_TIMER) __turnOffPWM(timer);
+}
+// Log(HSP v3.7): END
+
+void digitalWrite(uint8_t pin, uint8_t val)
+{
 	uint8_t bit = digitalPinToBitMask(pin);
 	uint8_t port = digitalPinToPort(pin);
 	volatile uint8_t *out;
@@ -174,7 +214,12 @@ void digitalWrite(uint8_t pin, uint8_t val)
 
 	// If the pin that support PWM output, we need to turn it off
 	// before doing a digital write.
-	if (timer != NOT_ON_TIMER) turnOffPWM(timer);
+	// Log(HSP v3.7): 
+	//  - move to pinMode() to make I/O writer more faster
+	//  - it should be no problem to turn/off PWM if we set i/o direction explicitly!
+	//uint8_t timer = digitalPinToTimer(pin);
+	//if(timer != NOT_ON_TIMER) __turnOffPWM(timer);
+	// Log(HSP v3.7): END
 
 	out = portOutputRegister(port);
 
@@ -192,7 +237,6 @@ void digitalWrite(uint8_t pin, uint8_t val)
 
 int digitalRead(uint8_t pin)
 {
-	uint8_t timer = digitalPinToTimer(pin);
 	uint8_t bit = digitalPinToBitMask(pin);
 	uint8_t port = digitalPinToPort(pin);
 
@@ -200,7 +244,17 @@ int digitalRead(uint8_t pin)
 
 	// If the pin that support PWM output, we need to turn it off
 	// before getting a digital reading.
-	if (timer != NOT_ON_TIMER) turnOffPWM(timer);
+	// Log(HSP v3.7): 
+	//  - think that: why we do read pin if we set it to pwm mode ??
+	//	- Maybe, it should be in case of some very special application,
+	//  - so, it's your matter to turn/off pwm before read.
+	//	- You can turn/off pwm by pwmTurnOff() or pinMode()
+	// The More:
+	//	- Infect, we can read pin even in pwm cycle. that is useful if we want to
+	//	- test current pwm output status (if we run fast enough!!)
+	//uint8_t timer = digitalPinToTimer(pin);
+	//if (timer != NOT_ON_TIMER) pwmTurnOff(timer);
+	// Log(HSP v3.7): END
 
 	if (*portInputRegister(port) & bit) return HIGH;
 	return LOW;
@@ -222,8 +276,8 @@ void digitalToggle(uint8_t pin)
 }
 
 // Log(HSP v3.7): Exntenced PWM output
+// Note: you can keep on use analogWrite() for compatible purpose!
 #if defined(__LGT8FX8P__) || defined(__LGT8F8XE__)
-// Note: it's still compatible with analogWrite() for PWM funciton
 void pwmWrite(uint8_t pin, uint16_t val)
 {
 	// We need to make sure the PWM output is enabled for those pins
@@ -233,10 +287,6 @@ void pwmWrite(uint8_t pin, uint16_t val)
 	// call for the analog output pins.
 
 	// duty cycle validation: settings should not overflow of PWM frequency
-	uint16_t icr1_value = (ICR1H << 8) + ICR1L;
-
-	if(val > icr1_value) 
-		val = icr1_value;
 	
 	switch(digitalPinToTimer(pin)) {
 		// XXX fix needed for atmega8
@@ -251,17 +301,17 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(TCCR0A) && defined(COM0A1)
 		case TIMER0A: // D6
 			// connect pwm to pin on timer 0, channel A
-			sbi(DDRD, PD6);
 			cbi(TCCR0B, OC0AS);
-			sbi(TCCR0A, COM0A1);
 			OCR0A = val; // set pwm duty
+			sbi(TCCR0A, COM0A1);
+			sbi(DDRD, PD6);
 			break;
 		#if defined(__LGTF8XP48__)			
 		case TIMER0AX: // E4
 			sbi(TCCR0B, OC0AS);
-			OCR0A = val;	
-			sbi(DDRE, PE4);					
+			OCR0A = val;						
 			sbi(TCCR0A, COM0A1);
+			sbi(DDRE, PE4);
 			break;
 		#endif
 		#endif
@@ -270,17 +320,17 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			// connect pwm to pin on timer 0, channel B
 		#if defined(__LGTF8XP48__)
 			unlockWrite(&PMX0, (PMX0 & ~_BV(C0BF3)));
-		#endif		
-			sbi(DDRD, PD5);
+		#endif					
 			OCR0B = val; // set pwm duty			
 			sbi(TCCR0A, COM0B1);
+			sbi(DDRD, PD5);
 			break;
 		#if defined(__LGTF8XP48__)
 		case TIMER0BX: // F3
-			sbi(DDRF, PF3);
 			unlockWrite(&PMX0, (PMX0 | _BV(C0BF3)));
 			OCR0B = val;
 			sbi(TCCR0A, COM0B1);
+			sbi(DDRF, PF3);
 			break;
 		#endif
 		#endif
@@ -300,7 +350,7 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			// F5 for LGT8F328P/QFP48
 			// E5 for LGT8F328P/QFP32 (tied with F5)
 		case TIMER1AX: 
-		#if defined (__LGT8F328P32__)
+		#if defined (__LGT8FX8P32__)
 			cbi(DDRE, PE5);
 		#endif	
 			sbi(TCCR1A, COM1A1);
@@ -342,7 +392,7 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(TCCR2) && defined(COM21)
 		case TIMER2:
 			// connect pwm to pin on timer 2
-			OCR2 = val; // set pwm duty			
+			OCR2 = (uint8_t)val; // set pwm duty			
 			sbi(TCCR2, COM21);
 			break;
 		#endif
@@ -353,14 +403,14 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#if defined(__LGT8FX8P48__)
 			unlockWrite(&PMX1, (PMX1 & ~_BV(C2AF6)));
 		#endif
-			OCR2A = val; // set pwm duty
+			OCR2A = (uint8_t)val; // set pwm duty
 			sbi(TCCR2A, COM2A1);			
 			sbi(DDRB, PB3);			
 			break;
 		#if defined(__LGT8F8P48__)
 		case TIMER2AX: // F6
 			unlockWrite(&PMX1, (PMX1 | _BV(C2AF6)));
-			OCR2A = val;			
+			OCR2A = (uint8_t)val;			
 			sbi(TCCR2A, COM2A1);
 			sbi(DDRF, PF6);
 			break;
@@ -374,12 +424,13 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			unlockWrite(&PMX1, (PMX1 & ~_BV(C2BF7)));
 		#endif	
 			sbi(TCCR2A, COM2B1);
-			OCR2B = val; // set pwm duty
+			OCR2B = (uint8_t)val; // set pwm duty
+			sbi(DDRD, PD3);
 			break;
 		#if defined(__LGT8F8P48__)
 		case TIMER2BX: // F7
 			unlockWrite(&PMX1, (PMX1 | _BV(C2BF7)));
-			OCR2B = val;
+			OCR2B = (uint8_t)val;
 			sbi(TCCR2A, COM2B1);
 			sbi(DDRF, PF7);
 			break;
@@ -390,9 +441,10 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		case TIMER3A: // D1 tied with F1
 			// connect pwm to pin on timer 3, channel A
 			cbi(UCSR0B, TXEN0);
-			//OCR3A = val; // set pwm duty
+			cbi(DDRD, PD1);
 			atomicWriteWord(&OCR3AL, val);
-			sbi(TCCR3A, COM3A1);			
+			sbi(TCCR3A, COM3A1);
+			sbi(DDRF, PF1);			
 			break;
 		#if defined(__LGT8FX8P48__)
 		case TIMER3AX: // F1 standalone
@@ -410,9 +462,10 @@ void pwmWrite(uint8_t pin, uint16_t val)
 		#endif
 
 		#if defined(TCCR3A) && defined(COM3B1)
-		case TIMER3B: // F2 tied with D2
-		#if defined(__LGT8FX8P48__)
-		case TIMER3BX:
+		case TIMER3BX: // F2 tied with D2
+		#if defined(__LGT8FX8P32__)
+		case TIMER3B:
+			cbi(DDRD, PD2);
 		#endif
 			// connect pwm to pin on timer 3, channel B
 			sbi(TCCR3A, COM3B1);

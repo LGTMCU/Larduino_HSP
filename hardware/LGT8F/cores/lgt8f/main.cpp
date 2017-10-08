@@ -17,7 +17,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 #include <avr/wdt.h>
-#include <Arduino.h>
+//#include <Arduino.h>
+#include <wiring_private.h>
 
 // Declared weak in Arduino.h to allow user redefinitions.
 int atexit(void (* /*func*/ )()) { return 0; }
@@ -40,6 +41,31 @@ void __patch_wdt(void)
 	wdt_disable();
 }
 #endif
+
+//#pragma __attribute__(always_inline)
+void unlockWrite(volatile uint8_t *p, uint8_t val)
+{
+	uint8_t _o_sreg = SREG;
+	volatile uint8_t *cp = p; 
+
+	if(p == &PMX1)
+		cp = &PMX0;
+	cli();
+	*cp = 0x80;
+	*p = val;
+	SREG = _o_sreg;
+}
+
+void atomicWriteWord(volatile uint8_t *p, uint16_t val)
+{
+	uint8_t _o_sreg = SREG;
+
+	cli();
+	*(p+1) = (uint8_t)(val >> 8);
+	nop();
+	*p = (uint8_t)val;
+	SREG = _o_sreg;
+}
 
 void sysClock(uint8_t mode)
 {
@@ -75,7 +101,65 @@ void sysClock(uint8_t mode)
 		PMCR = 0x80;
 		PMCR = GPIOR0;
 	}
-}	
+}
+
+#if defined(__LGT8FX8P__) || defined(__LGT8FX8E__)
+// Log(HSP v3.7): PWM working mode
+// Function:
+//	wmode: pwm working mode
+//		- PWM_MODE_NORMAL: normal single output
+//		- PWM_MODE_COMPM0: complementary dual output 
+//		- PWM_MODE_COMPM1: complementary dual output (inverted)
+//	fmode: pwm frequency settings
+//		- PWM_FREQ_SLOWER: slow range
+//		- PWM_FREQ_FASTER: fast range 
+//	dband: dead band settings
+//		- only valid for complementary working mode 
+void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode, uint8_t dband)
+{
+	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
+
+	if(timer == 0x10) {	// TIMER0
+	} else if(timer == 0x20) { // TIMER1
+	} else if(timer == 0x30) { // TIMER2
+			// TIMER8 is 8bit only, default frequency = 16000000/(64 * 256) = 976.5Hz
+			// TODO: Maybe it's good idea to make a possibility to modify its prescale
+			// - so we can get a littler more faster or slower frequency
+	} else if(timer == 0x40) { // TIMER3
+	}
+}
+
+// Log(HSP v3.7): enhanced PWM settings
+// Function:
+//	- set PWM frequency (unit: Hz), return maximum duty cycle 
+// Note: 
+//	- only PWM Timer1/Timer3 support frequency update
+uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
+{
+	uint16_t value = (uint16_t) ((F_CPU >> 1) / fhz);
+
+	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
+
+	if((timer == 0x20) {	// TIMER1
+			atomicWriteWord(&ICR1L, value);	
+			/*	
+			if(fmode == FREQ_BOOST) {
+				sbi(TCKCSR, F2XEN);
+				delayMicroseconds(10);
+				sbi(TCKCSR, TC2XS1);
+			} else if(bit_is_set(TCKCSR, TC2XS1)) {
+				cbi(TCKCSR, TC2XS1);
+				delayMicroseconds(10);
+				cbi(TCKCSR, F2XEN);
+			}
+			*/
+	} else if(timer == 0x40) { // TIMER3
+			atomicWriteWord(&ICR3L, value);
+	}
+
+	return value;
+}
+#endif
 
 void lgt8fx8x_init()
 {
@@ -137,4 +221,3 @@ int main(void)
         
 	return 0;
 }
-

@@ -140,9 +140,11 @@ void pinMode(uint8_t, uint8_t);
 void digitalWrite(uint8_t, uint8_t);
 int digitalRead(uint8_t);
 void digitalToggle(uint8_t);
+void pwmWrite(uint8_t, uint16_t);
+void pwmTurnOff(uint8_t);
 int analogRead(uint8_t);
 void analogReference(uint8_t mode);
-void analogWrite(uint8_t, int);
+void analogWrite(uint8_t, uint16_t);
 void analogReadResolution(uint8_t);
 
 unsigned long millis(void);
@@ -209,28 +211,44 @@ extern const uint8_t PROGMEM digital_pin_to_timer_PGM[];
 #define PL 12
 #endif
 
-#define NOT_ON_TIMER 0
-#define TIMER0A 1
-#define TIMER0B 2
-#define TIMER1A 3
-#define TIMER1B 4
-#define TIMER1C 5
-#define TIMER2  6
-#define TIMER2A 7
-#define TIMER2B 8
+#define NOT_ON_TIMER 0x00
+#define TIMER0A   0x10
+#define TIMER0B   0x11
+#define TIMER0AX  0x12
+#define TIMER0BX  0x13
 
-#define TIMER3A 9
-#define TIMER3B 10
-#define TIMER3C 11
-#define TIMER4A 12
-#define TIMER4B 13
-#define TIMER4C 14
-#define TIMER4D 15
-#define TIMER5A 16
-#define TIMER5B 17
-#define TIMER5C 18
-#define LGTDAO0	80
-#define LGTDAO1	81
+#define TIMER1A   0x20
+#define TIMER1B   0x21
+#define TIMER1C   0x22
+#define TIMER1AX  0x23
+#define TIMER1BX  0x24
+
+#define TIMER2    0x30
+#define TIMER2A   0x31
+#define TIMER2B   0x32
+#define TIMER2AX  0x33
+#define TIMER2BX  0x34
+
+#define TIMER3A   0x40
+#define TIMER3B   0x41
+#define TIMER3C   0x42
+#define TIMER3AX  0x43
+#define TIMER3BX  0x44
+#define TIMER3AA  0x45
+
+#define TIMER4A   0x50
+#define TIMER4B   0x51
+#define TIMER4C   0x52
+#define TIMER4D   0x53
+#define TIMER5A   0x60
+#define TIMER5B   0x61
+#define TIMER5C   0x62
+
+#define LGTDAO0   0xf0
+#define LGTDAO1   0xf1
+
+void unlockWrite(volatile uint8_t *, uint8_t);
+void atomicWriteWord(volatile uint8_t *, uint16_t);
 
 #ifdef __cplusplus
 } // extern "C"
@@ -262,6 +280,18 @@ long random(long, long);
 void randomSeed(unsigned long);
 long map(long, long, long, long, long);
 
+// PWM workong mode and frequency settings
+uint16_t pwmFrequency(uint8_t pin, uint32_t fhz);
+
+#define PWM_MODE_NORMAL   0x00
+#define PWM_MODE_COMPM0   0x80
+#define PMW_MODE_COMPM1   0x81
+
+#define PWM_FREQ_BOOST    0x80
+#define PWM_FREQ_SLOW     0x00
+#define PWM_FREQ_FAST     0x01
+void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode = PWM_FREQ_FAST, uint8_t dband = 0);
+
 #endif
 
 #include "pins_arduino.h"
@@ -269,7 +299,8 @@ long map(long, long, long, long, long);
 #if defined(__LGT8FX8E__) || defined(__LGT8FX8P__)
 #define	INT_OSC	0
 #define	EXT_OSC	1
-void sysClock(uint8_t);
+void sysClock(uint8_t mode);
+
 #endif
 
 #ifndef nop

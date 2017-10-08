@@ -9,7 +9,6 @@ Installation Guide
 
 = Features
 ------------------------------------------------
-	- Support arduino 1.0.x/1.5.x/1.6.x
 	- Support bootloader by optiboot
 	- Bootloader baudrate: 57600bps
 	- Support board: Larduino & LGT8F88A MiniDev
@@ -17,11 +16,11 @@ Installation Guide
 
 = Package contents
 ------------------------------------------------
-	Larduino_HSP_v3.6 : package root directory
+	Larduino_HSP_vX.X : package root directory
 	|
 	+ hardware : 3rd party hardware support package
 	|    |
-	|    + LGT : package for support arduino 1.5.x/1.6.x
+	|    + LGT : package for support arduino > 1.0.x
 	|    |
 	|    + LGT8F : package for support arduino 1.0.x
 	|
@@ -29,7 +28,7 @@ Installation Guide
 
 = Installation:
 -----------------------------------------------
-	- Unzip Larduino_HSP_v3.6.rar
+	- Unzip Larduino_HSP_vX.X.rar
 	- Copy [sketches], [hardware] and [libraries] directories to arduino's sketchbook direcotry
 	- Restart Arduino, you will see new board from [Tools]->[Border] menu.
 

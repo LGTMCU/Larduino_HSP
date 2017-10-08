@@ -178,19 +178,20 @@ int __analogRead(uint8_t pin)
 
 int analogRead(uint8_t pin)
 {
+	uint16_t adcVal = __analogRead(pin);
+
 #if defined(__LGT8F__)
 	if(analog_resbit == 0)
-		return __analogRead(pin);
+		return adcVal;
 
 	if(analog_resdir == 1) {
-		return __analogRead(pin) >> analog_resbit;
+		return adcVal >> analog_resbit;
 	} else {
-		return __analogRead(pin) << analog_resbit;
+		return adcVal << analog_resbit;
 	}
 #else
-	return __analogRead(pin);
-#endif
-	
+	return adcVal;
+#endif	
 }
 
 // Right now, PWM output only works on the pins with
@@ -198,7 +199,7 @@ int analogRead(uint8_t pin)
 // pins_*.c file.  For the rest of the pins, we default
 // to digital output.
 
-void analogWrite(uint8_t pin, int val)
+void analogWrite(uint8_t pin, uint16_t val)
 {
 	// We need to make sure the PWM output is enabled for those pins
 	// that support it, as we turn it off when digitally reading or
@@ -245,7 +246,10 @@ void analogWrite(uint8_t pin, int val)
 			case TIMER1A:
 				// connect pwm to pin on timer 1, channel A
 				sbi(TCCR1A, COM1A1);
-				OCR1A = val; // set pwm duty
+				//OCR1A = val; // set pwm duty
+				// Log(HSP v3.7): compatible mode
+				atomicWriteWord(&OCR1AL, (val << 6));
+				// Log(HSP v3.7): END
 				break;
 			#endif
 
@@ -253,7 +257,10 @@ void analogWrite(uint8_t pin, int val)
 			case TIMER1B:
 				// connect pwm to pin on timer 1, channel B
 				sbi(TCCR1A, COM1B1);
-				OCR1B = val; // set pwm duty
+				//OCR1B = val; // set pwm duty
+				// Log(HSP v3.7): compatible mode
+				atomicWriteWord(&OCR1BL, (val << 6));
+				// Log(HSP v3.7): END
 				break;
 			#endif
 
@@ -280,7 +287,7 @@ void analogWrite(uint8_t pin, int val)
 				OCR2B = val; // set pwm duty
 				break;
 			#endif
-
+ 
 			#if defined(TCCR3A) && defined(COM3A1)
 			case TIMER3A:
 				// connect pwm to pin on timer 3, channel A
@@ -342,7 +349,6 @@ void analogWrite(uint8_t pin, int val)
 				OCR4D = val;	// set pwm duty
 				break;
 			#endif
-
 							
 			#if defined(TCCR5A) && defined(COM5A1)
 			case TIMER5A:

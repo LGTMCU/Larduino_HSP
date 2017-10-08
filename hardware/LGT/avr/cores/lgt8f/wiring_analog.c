@@ -178,19 +178,19 @@ int __analogRead(uint8_t pin)
 
 int analogRead(uint8_t pin)
 {
-	uint16_t aVal = __analogRead(pin);
+	uint16_t adcVal = __analogRead(pin);
 
 #if defined(__LGT8F__)
 	if(analog_resbit == 0)
-		return aVal;
+		return adcVal;
 
 	if(analog_resdir == 1) {
-		return aVal >> analog_resbit;
+		return adcVal >> analog_resbit;
 	} else {
-		return aVal << analog_resbit;
+		return adcVal << analog_resbit;
 	}
 #else
-	return aVal;
+	return adcVal;
 #endif	
 }
 
