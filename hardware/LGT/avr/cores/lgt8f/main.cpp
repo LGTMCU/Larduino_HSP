@@ -248,6 +248,7 @@ uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
 			icrx = (uint16_t) ((64000000UL >> 11) / fhz);
 		}	
 	}
+	
 	atomicWriteWord(pICRX, icrx);
 
 	return icrx;

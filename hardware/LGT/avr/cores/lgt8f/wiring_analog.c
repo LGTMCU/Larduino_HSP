@@ -206,10 +206,13 @@ void analogWrite(uint8_t pin, uint16_t val)
 	// writing with them.  Also, make sure the pin is in output mode
 	// for consistenty with Wiring, which doesn't require a pinMode
 	// call for the analog output pins.
-	
+
 	if(LGT_NOT_DACO(pin)) {
 		pinMode(pin, OUTPUT);
 	}
+
+	// Log(HSP v3.7): 
+	//	- timer 1 is now set to full 16bit support
 
 	if (val == 0 && LGT_NOT_DACO(pin)) {
 		digitalWrite(pin, LOW);
@@ -221,156 +224,156 @@ void analogWrite(uint8_t pin, uint16_t val)
 			#if defined(TCCR0) && defined(COM00) && !defined(__AVR_ATmega8__)
 			case TIMER0A:
 				// connect pwm to pin on timer 0
-				sbi(TCCR0, COM00);
 				OCR0 = val; // set pwm duty
+				sbi(TCCR0, COM00);
 				break;
 			#endif
 
 			#if defined(TCCR0A) && defined(COM0A1)
 			case TIMER0A:
 				// connect pwm to pin on timer 0, channel A
-				sbi(TCCR0A, COM0A1);
 				OCR0A = val; // set pwm duty
+				sbi(TCCR0A, COM0A1);
 				break;
 			#endif
 
 			#if defined(TCCR0A) && defined(COM0B1)
 			case TIMER0B:
 				// connect pwm to pin on timer 0, channel B
-				sbi(TCCR0A, COM0B1);
 				OCR0B = val; // set pwm duty
+				sbi(TCCR0A, COM0B1);
 				break;
 			#endif
 
 			#if defined(TCCR1A) && defined(COM1A1)
 			case TIMER1A:
 				// connect pwm to pin on timer 1, channel A
-				sbi(TCCR1A, COM1A1);
 				//OCR1A = val; // set pwm duty
 				// Log(HSP v3.7): compatible mode
-				atomicWriteWord(&OCR1AL, (val << 6));
+				atomicWriteWord(&OCR1AL, val);
 				// Log(HSP v3.7): END
+				sbi(TCCR1A, COM1A1);
 				break;
 			#endif
 
 			#if defined(TCCR1A) && defined(COM1B1)
 			case TIMER1B:
 				// connect pwm to pin on timer 1, channel B
-				sbi(TCCR1A, COM1B1);
 				//OCR1B = val; // set pwm duty
 				// Log(HSP v3.7): compatible mode
-				atomicWriteWord(&OCR1BL, (val << 6));
+				atomicWriteWord(&OCR1BL, val);
 				// Log(HSP v3.7): END
+				sbi(TCCR1A, COM1B1);
 				break;
 			#endif
 
 			#if defined(TCCR2) && defined(COM21)
 			case TIMER2:
 				// connect pwm to pin on timer 2
-				sbi(TCCR2, COM21);
 				OCR2 = val; // set pwm duty
+				sbi(TCCR2, COM21);
 				break;
 			#endif
 
 			#if defined(TCCR2A) && defined(COM2A1)
 			case TIMER2A:
 				// connect pwm to pin on timer 2, channel A
-				sbi(TCCR2A, COM2A1);
 				OCR2A = val; // set pwm duty
+				sbi(TCCR2A, COM2A1);
 				break;
 			#endif
 
 			#if defined(TCCR2A) && defined(COM2B1)
 			case TIMER2B:
 				// connect pwm to pin on timer 2, channel B
-				sbi(TCCR2A, COM2B1);
 				OCR2B = val; // set pwm duty
+				sbi(TCCR2A, COM2B1);
 				break;
 			#endif
  
 			#if defined(TCCR3A) && defined(COM3A1)
 			case TIMER3A:
 				// connect pwm to pin on timer 3, channel A
-				sbi(TCCR3A, COM3A1);
 				OCR3A = val; // set pwm duty
+				sbi(TCCR3A, COM3A1);
 				break;
 			#endif
 
 			#if defined(TCCR3A) && defined(COM3B1)
 			case TIMER3B:
 				// connect pwm to pin on timer 3, channel B
-				sbi(TCCR3A, COM3B1);
 				OCR3B = val; // set pwm duty
+				sbi(TCCR3A, COM3B1);
 				break;
 			#endif
 
 			#if defined(TCCR3A) && defined(COM3C1)
 			case TIMER3C:
 				// connect pwm to pin on timer 3, channel C
-				sbi(TCCR3A, COM3C1);
 				OCR3C = val; // set pwm duty
+				sbi(TCCR3A, COM3C1);
 				break;
 			#endif
 
 			#if defined(TCCR4A)
 			case TIMER4A:
+				OCR4A = val;	// set pwm duty
 				//connect pwm to pin on timer 4, channel A
 				sbi(TCCR4A, COM4A1);
 				#if defined(COM4A0)		// only used on 32U4
 				cbi(TCCR4A, COM4A0);
 				#endif
-				OCR4A = val;	// set pwm duty
 				break;
 			#endif
 			
 			#if defined(TCCR4A) && defined(COM4B1)
 			case TIMER4B:
+				OCR4B = val; // set pwm duty
 				// connect pwm to pin on timer 4, channel B
 				sbi(TCCR4A, COM4B1);
-				OCR4B = val; // set pwm duty
 				break;
 			#endif
 
 			#if defined(TCCR4A) && defined(COM4C1)
 			case TIMER4C:
 				// connect pwm to pin on timer 4, channel C
-				sbi(TCCR4A, COM4C1);
 				OCR4C = val; // set pwm duty
+				sbi(TCCR4A, COM4C1);
 				break;
 			#endif
 				
 			#if defined(TCCR4C) && defined(COM4D1)
-			case TIMER4D:				
+			case TIMER4D:
+				OCR4D = val;	// set pwm duty				
 				// connect pwm to pin on timer 4, channel D
 				sbi(TCCR4C, COM4D1);
 				#if defined(COM4D0)		// only used on 32U4
 				cbi(TCCR4C, COM4D0);
 				#endif
-				OCR4D = val;	// set pwm duty
 				break;
 			#endif
 							
 			#if defined(TCCR5A) && defined(COM5A1)
 			case TIMER5A:
+				OCR5A = val; // set pwm duty
 				// connect pwm to pin on timer 5, channel A
 				sbi(TCCR5A, COM5A1);
-				OCR5A = val; // set pwm duty
 				break;
 			#endif
 
 			#if defined(TCCR5A) && defined(COM5B1)
 			case TIMER5B:
+				OCR5B = val; // set pwm duty
 				// connect pwm to pin on timer 5, channel B
 				sbi(TCCR5A, COM5B1);
-				OCR5B = val; // set pwm duty
 				break;
 			#endif
 
 			#if defined(TCCR5A) && defined(COM5C1)
 			case TIMER5C:
+				OCR5C = val; // set pwm duty
 				// connect pwm to pin on timer 5, channel C
 				sbi(TCCR5A, COM5C1);
-				OCR5C = val; // set pwm duty
 				break;
 			#endif
 			#if defined(__LGT8FX8E__) || defined(__LGT8FX8P__)
