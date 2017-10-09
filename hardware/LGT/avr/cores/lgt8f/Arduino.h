@@ -140,12 +140,14 @@ void pinMode(uint8_t, uint8_t);
 void digitalWrite(uint8_t, uint8_t);
 int digitalRead(uint8_t);
 void digitalToggle(uint8_t);
-void pwmWrite(uint8_t, uint16_t);
-void pwmTurnOff(uint8_t);
 int analogRead(uint8_t);
 void analogReference(uint8_t mode);
 void analogWrite(uint8_t, uint16_t);
 void analogReadResolution(uint8_t);
+
+void pwmWrite(uint8_t, uint16_t);
+void pwmTurnOff(uint8_t);
+uint32_t pwmGetFreqByResolution(uint8_t, uint8_t, uint8_t);
 
 unsigned long millis(void);
 unsigned long micros(void);
@@ -292,6 +294,13 @@ uint16_t pwmFrequency(uint8_t pin, uint32_t fhz);
 #define PWM_MODE_NORMAL   0x80
 #define PWM_MODE_COMPM0   0x00
 #define PWM_MODE_COMPM1   0x10
+#define PWM_MODE_COMPM2   0x10
+#define PWM_MODE_COMPM3   0x10
+#define PWM_MODE_SOLO     0x80
+#define PWM_MODE_DUO0     0x00
+#define PWM_MODE_DUO1     0x10
+#define PWM_MODE_DUO2     0x10
+#define PWM_MODE_DUO3     0x10
 
 #define PWM_FREQ_BOOST    0x80
 #define PWM_FREQ_FAST     0x01

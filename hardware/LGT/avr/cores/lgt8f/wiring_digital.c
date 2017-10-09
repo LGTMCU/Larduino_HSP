@@ -343,8 +343,8 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			sbi(TCCR1A, COM1A1);
 			#if defined(__LGT8FX8P__)	
 			unlockWrite(&PMX0, (PMX0 & ~_BV(C1AF5)));
-			sbi(DDRB, PB2);
 			#endif			
+			sbi(DDRB, PB1);
 			break;
 		#if defined(__LGT8FX8P__)
 			// F5 for LGT8F328P/QFP48
@@ -369,8 +369,8 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			sbi(TCCR1A, COM1B1);
 			#if defined(__LGT8FX8P__)
 			unlockWrite(&PMX0, (PMX0 & ~_BV(C1BF4)));		
-			sbi(DDRB, PB2);
 			#endif			
+			sbi(DDRB, PB2);
 			break;
 		
 		#if defined(__LGT8FX8P__)

@@ -191,7 +191,7 @@ static const uint8_t A11 = 26;
 #define	V5D4	28
 #define	AGND	29
 #define	DACO	30
-#define	PGAO	32
+#define	PGAO	31
 #endif
 
 #define digitalPinToPCICR(p)    (((p) >= 0 && (p) <= 21) ? (&PCICR) : ((uint8_t *)0))

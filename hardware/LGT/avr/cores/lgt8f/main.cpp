@@ -121,6 +121,9 @@ void sysClock(uint8_t mode)
 //		- only valid for complementary working mode 
 // note:
 //		- Timer 2 is used for system tick, so don't touch!!
+//static uint8_t tmr1_boost_en = 0;
+//static uint8_t tmr3_boost_en = 0;
+
 void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode, uint8_t dband)
 {
 	volatile uint8_t *pTCCRX = 0;
@@ -201,25 +204,24 @@ uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
 {
 	uint16_t icrx = 0;
 	uint8_t csxs = 0;
+	uint8_t boost = 0;
 	volatile uint8_t *pICRX = 0;
 
 	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
 
+	// Note for TIMER0 
+	// ============================================================================
 	// timer 0 working in FPWM mode which TOP is fixed to 0xFF
 	// so we can change its prescale to set frequency range (fast/normal/slow)
-	// fast mode: 
-	//		- max = 16000000/(1*256) = 62.5K, support boost up to 62.5x4 = 250KHz
-	//		- min = 16000000/(256*256) = 244Hz, support boost up to 976Hz
-	// normal mode:
-	//		- max = 16000000/(64*256) = 976Hz, support boost up to 3.9KHz
-	//		- min = 16000000/(256*64*256) = 3.8Hz, support boost up to 15.2Hz
-	// slow mode:
-	//		- max = 16000000/(1024*256) = 61Hz
-	//		- min = 16000000/(256*1024*256) = 0.238Hz
+	// fast mode:	16000000/(1*256) = 62.5K, support boost up to 62.5x4 = 250KHz
+	// normal mode:	16000000/(64*256) = 976Hz, support boost up to 3.9KHz
+	// slow mode:	16000000/(1024*256) = 61Hz, support boost up to 244Hz
+	// ============================================================================
 
 	if(timer == TIMER1) { // TIMER1
 		pICRX = &ICR1L;
 		csxs = TCCR1B & 0x7;
+		boost = bit_is_set(TCKCSR, TC2XS1);
 	} else if(timer == TIMER3) { // TIMER3
 		pICRX = &ICR3L;
 		csxs = TCCR3B & 0x7;
@@ -227,17 +229,64 @@ uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
 
 	if(pICRX == 0) return 0xff;
 
-	if(csxs == PWM_FREQ_FAST) { // fast mode
-		icrx = (uint16_t) ((F_CPU >> 1) / fhz);
-	} else if(csxs == PWM_FREQ_NORMAL) { // normal mode
-		icrx = (uint16_t) ((F_CPU >> 7) / fhz);
-	} else if(csxs == PWM_FREQ_SLOW) { // slow mode
-		icrx = (uint16_t) ((F_CPU >> 11) / fhz);
+	// DO NOT try to merge the two cases, compiler will try to 
+	// optimize the divider if either of oprands is constant value
+	if(boost == 0) {
+		if(csxs == PWM_FREQ_FAST) { // fast mode
+			icrx = (uint16_t) ((F_CPU >> 1) / fhz);
+		} else if(csxs == PWM_FREQ_NORMAL) { // normal mode
+			icrx = (uint16_t) ((F_CPU >> 7) / fhz);
+		} else if(csxs == PWM_FREQ_SLOW) { // slow mode
+			icrx = (uint16_t) ((F_CPU >> 11) / fhz);
+		}
+	} else {
+		if(csxs == PWM_FREQ_FAST) { // fast mode
+			icrx = (uint16_t) ((64000000UL >> 1) / fhz);
+		} else if(csxs == PWM_FREQ_NORMAL) { // normal mode
+			icrx = (uint16_t) ((64000000UL >> 7) / fhz);
+		} else if(csxs == PWM_FREQ_SLOW) { // slow mode
+			icrx = (uint16_t) ((64000000UL >> 11) / fhz);
+		}	
 	}
-
 	atomicWriteWord(pICRX, icrx);
 
 	return icrx;
+}
+
+// Log(HSP v3.7):
+// Function:
+//	- return frequency (in Hz) by give PWM resolution (bits width of duty)
+// Note: 
+//	- timer0/2 works in FPWM mode, pwm frequency is fixed by given mode
+//	- timer1/3 works in PCPWM mode, means frequency reduced by a half
+uint32_t pwmGetFreqByResolution(uint8_t pin, uint8_t fmode, uint8_t resBits)
+{
+	uint32_t freq = 0x0UL;
+
+	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
+
+	if(timer != TIMER1 && timer != TIMER3)
+		return 0x0UL;
+	
+	if((fmode & PWM_FREQ_BOOST) == PWM_FREQ_BOOST) {
+		if((fmode & 0xf) == PWM_FREQ_FAST) {
+			freq = (64000000UL >> 1) / (1 << resBits);
+		} else if((fmode & 0xf) == PWM_FREQ_SLOW) {
+			freq = (64000000UL >> 11) / (1 << resBits);
+		} else { // PWM_FREQ_NORMAL
+			freq = (64000000UL >> 7) / (1 << resBits);
+		}
+	} else {
+		if((fmode & 0xf) == PWM_FREQ_FAST) {
+			freq = (F_CPU >> 1) / (1 << resBits);
+		} else if((fmode & 0xf) == PWM_FREQ_SLOW) {
+			freq = (F_CPU >> 11) / (1 << resBits);
+		} else { // PWM_FREQ_NORMAL
+			freq = (F_CPU >> 7) / (1 << resBits);
+		}
+	}
+
+	return freq;
 }
 #endif
 
@@ -281,7 +330,7 @@ void lgt8fx8x_init()
 int main(void)
 {
 #if defined(__LGT8F__)
-	lgt8fx8x_init();
+	lgt8fx8x_init(); 
 #endif	
 
 	init();
