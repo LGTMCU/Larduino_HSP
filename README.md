@@ -2,7 +2,7 @@
 ### Ardunio 3rd-party hardware package for LGT8F
 
 ## Installation Guide
-=====================
+
 ### Features
 * Support bootloader by optiboot
 * Bootloader baudrate: 57600bps
