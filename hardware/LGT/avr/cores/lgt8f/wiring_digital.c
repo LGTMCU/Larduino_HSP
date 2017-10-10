@@ -306,7 +306,7 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			cbi(TCCR0B, OC0AS);	//*****
 			sbi(DDRD, PD6);
 			break;
-		#if defined(__LGTF8XP48__)			
+		#if defined(__LGT8FXP48__)			
 		case TIMER0AX: // E4
 			OCR0A = (uint8_t)val;						
 			sbi(TCCR0A, COM0A1);
@@ -320,12 +320,12 @@ void pwmWrite(uint8_t pin, uint16_t val)
 			// connect pwm to pin on timer 0, channel B			
 			OCR0B = (uint8_t)val; // set pwm duty			
 			sbi(TCCR0A, COM0B1);				
-			#if defined(__LGTF8XP48__)
+			#if defined(__LGT8FXP48__)
 			unlockWrite(&PMX0, (PMX0 & ~_BV(C0BF3)));
 			#endif					
 			sbi(DDRD, PD5);
 			break;
-		#if defined(__LGTF8XP48__)
+		#if defined(__LGT8FXP48__)
 		case TIMER0BX: // F3
 			OCR0B = (uint8_t)val;
 			sbi(TCCR0A, COM0B1);
