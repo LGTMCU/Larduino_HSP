@@ -27,8 +27,9 @@
 -----------------------------------------------
 You can always find this directory from [File]->[Preferences] menu.
 Here is the default sketchbook directory for most popluar system:
-System | Path of sketchbook
-------- | ------------------
-Windows | C:\Users\<Username>\Documents\Arduino
-Mac OSX | /Users/user/Documents/Arduino
-LINUX | /home/<Username>/sketchbook
+
+| System | Path of sketchbook |
+| ------ | ------------------ |
+| Windows | C:\Users\<Username>\Documents\Arduino |
+| Mac OSX | /Users/user/Documents/Arduino |
+| LINUX | /home/<Username>/sketchbook |
