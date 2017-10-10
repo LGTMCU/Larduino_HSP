@@ -147,7 +147,6 @@ void analogReadResolution(uint8_t);
 
 void pwmWrite(uint8_t, uint16_t);
 void pwmTurnOff(uint8_t);
-uint32_t pwmGetFreqByResolution(uint8_t, uint8_t, uint8_t);
 
 unsigned long millis(void);
 unsigned long micros(void);
@@ -289,7 +288,8 @@ void randomSeed(unsigned long);
 long map(long, long, long, long, long);
 
 // PWM workong mode and frequency settings
-uint16_t pwmFrequency(uint8_t pin, uint32_t fhz);
+uint16_t pwmFrequency(uint8_t, uint32_t);
+uint32_t pwmResolution(uint8_t, uint8_t);
 
 #define PWM_MODE_NORMAL   0x80
 #define PWM_MODE_COMPM0   0x00

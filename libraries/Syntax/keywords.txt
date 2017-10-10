@@ -17,8 +17,8 @@ pwmTurnOff      KEYWORD1
 startTick       KEYWORD1
 stopTick        KEYWORD1
 sysClock        KEYWORD1
-digtialToggle   KEYWORD1
-pwmGetFreqByResolution    KEYWORD1
+digitalToggle   KEYWORD1
+pwmResolution   KEYWORD1
 
 #######################################
 # Constants (LITERAL1)

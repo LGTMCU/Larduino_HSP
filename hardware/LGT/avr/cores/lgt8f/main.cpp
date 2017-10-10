@@ -221,7 +221,7 @@ uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
 	if(timer == TIMER1) { // TIMER1
 		pICRX = &ICR1L;
 		csxs = TCCR1B & 0x7;
-		boost = bit_is_set(TCKCSR, TC2XS1);
+		boost = bit_is_set(TCKCSR, TC2XF1);
 	} else if(timer == TIMER3) { // TIMER3
 		pICRX = &ICR3L;
 		csxs = TCCR3B & 0x7;
@@ -260,32 +260,44 @@ uint16_t pwmFrequency(uint8_t pin, uint32_t fhz)
 // Note: 
 //	- timer0/2 works in FPWM mode, pwm frequency is fixed by given mode
 //	- timer1/3 works in PCPWM mode, means frequency reduced by a half
-uint32_t pwmGetFreqByResolution(uint8_t pin, uint8_t fmode, uint8_t resBits)
+uint32_t pwmResolution(uint8_t pin, uint8_t resBits)
 {
+	uint8_t csxs = 0;
+	uint8_t boost = 0;
 	uint32_t freq = 0x0UL;
 
 	uint8_t timer = digitalPinToTimer(pin) & 0xf0;
 
 	if(timer != TIMER1 && timer != TIMER3)
 		return 0x0UL;
+
+	if(timer == TIMER1) { // TIMER1
+		csxs = TCCR1B & 0x7;
+		boost = bit_is_set(TCKCSR, TC2XF1);
+	} else if(timer == TIMER3) { // TIMER3
+		csxs = TCCR3B & 0x7;
+	}	
 	
-	if((fmode & PWM_FREQ_BOOST) == PWM_FREQ_BOOST) {
-		if((fmode & 0xf) == PWM_FREQ_FAST) {
+	if(boost != 0) {
+		if(csxs == PWM_FREQ_FAST) {
 			freq = (64000000UL >> 1) / (1 << resBits);
-		} else if((fmode & 0xf) == PWM_FREQ_SLOW) {
+		} else if(csxs == PWM_FREQ_SLOW) {
 			freq = (64000000UL >> 11) / (1 << resBits);
 		} else { // PWM_FREQ_NORMAL
 			freq = (64000000UL >> 7) / (1 << resBits);
 		}
 	} else {
-		if((fmode & 0xf) == PWM_FREQ_FAST) {
+		if(csxs == PWM_FREQ_FAST) {
 			freq = (F_CPU >> 1) / (1 << resBits);
-		} else if((fmode & 0xf) == PWM_FREQ_SLOW) {
+		} else if(csxs == PWM_FREQ_SLOW) {
 			freq = (F_CPU >> 11) / (1 << resBits);
 		} else { // PWM_FREQ_NORMAL
 			freq = (F_CPU >> 7) / (1 << resBits);
 		}
 	}
+
+	// update pwm frequency
+	pwmFrequency(pin, freq);
 
 	return freq;
 }

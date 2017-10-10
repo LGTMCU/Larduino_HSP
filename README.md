@@ -15,9 +15,8 @@
 1. Restart Arduino, you will see new board from [**Tools**]->[**Border**] menu.
 
 ### About arduino's sketchbook directory:
-You can always find this directory from **[File]->[Preferences]** menu.
-
-Here is the default sketchbook directory for most popluar system:
+	You can always find this directory from **[File]->[Preferences]** menu.
+	Here is the default sketchbook directory for most popluar system:
 
 | System | Path of sketchbook |
 | :----- | :----------------- |
