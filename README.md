@@ -8,14 +8,6 @@
 * Bootloader baudrate: 57600bps
 * Support board: Larduino & LGT8F88A MiniDev
 * Support board: Larduino w/ LGT8FX8D and LGT8FX8P
-
-### Package contents
-------------------------------------------------
-:open_file_folder: Larduino_HSP_vX.X : package root directory
-    :open_file_folder: hardware : 3rd party hardware support package
-        :page_facing_up: LGT : package for support arduino > 1.0.x
-        :page_facing_up: LGT8F : package for support arduino 1.0.x
-:close_file_folder: libraries : 3rd party hardware library
 	
 ### Installation:
 -----------------------------------------------
