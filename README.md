@@ -12,14 +12,10 @@
 ### Package contents
 ------------------------------------------------
 :open_file_folder: Larduino_HSP_vX.X : package root directory
-
-	:open_file_folder: hardware : 3rd party hardware support package
-
-		:page_facing_up: LGT : package for support arduino > 1.0.x
-
-		:page_facing_up: LGT8F : package for support arduino 1.0.x
-
-	:file_folder: libraries : 3rd party hardware library
+    :open_file_folder: hardware : 3rd party hardware support package
+        :page_facing_up: LGT : package for support arduino > 1.0.x
+        :page_facing_up: LGT8F : package for support arduino 1.0.x
+:close_file_folder: libraries : 3rd party hardware library
 	
 ### Installation:
 -----------------------------------------------
@@ -33,8 +29,8 @@ You can always find this directory from **[File]->[Preferences]** menu.
 
 Here is the default sketchbook directory for most popluar system:
 
-|: System |: Path of sketchbook |
-|: ------ | ------------------ |
-|: Windows |: C:\Users\<Username>\Documents\Arduino |
-|: Mac OSX |: /Users/user/Documents/Arduino |
-|: LINUX |: /home/<Username>/sketchbook |
+| System | Path of sketchbook |
+| :----- | :----------------- |
+| Windows | C:\Users\<Username>\Documents\Arduino |
+| Mac OSX | /Users/user/Documents/Arduino |
+| LINUX | /home/<Username>/sketchbook |
