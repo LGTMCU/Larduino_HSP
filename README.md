@@ -9,8 +9,9 @@
 
 ### Summary
 Larduino_HSP is 3'rd party hardware support package for LGT8F core based arduino boards.<br>
-The core of HSP is fork from arduino distribution. We have try best to keep all the standard <br>features compatible with current arduino world. So you can feel free to try resuse all of <br> the libraries which designed for arduino platform.<br><br>
-LGT8F's core based microcontroller, e.g LGT8F328P has more advanced features which not <br>
+The backend of **HSP** fork from offical arduino distribution. We have try to keep all the standard <br>
+features compatible with arduino world. So feel free to resuse all of the libraries which designed for arduino platform.<br><br>
+Microcontroller, based on LGT8F, e.g LGT8F328P has more advanced features which not <br>
 covered in standard arduino implementation. so there are also many new features merged to this<br> 3'rd party package. Important update and new features as following:<br>
 
 * *External/Internal crystal can be selected at runtime*
@@ -47,12 +48,14 @@ void setup() {
 	pwmMode(D5, PWM_MODE_SOLO, PWM_FREQ_FAST);
 
 	// usage: pwmResolution(pin, res_bits)
+	// set PWM resolution to 7bit
 	pwmResolution(D5, 7);
 	// or we can set PWM frequency directly
 	// usage: pwmFrequency(pin, freq_in_hz)
 	// pwmFrequency(D5, 500000);
 
 	// usage: pwmWrite(pin, duty)
+	// Note that we have set PWM resolution to 7bit
 	pwmWrite(D5, 128 >> 1);
 	pwmWrite(D6, 128 >> 2);
 }

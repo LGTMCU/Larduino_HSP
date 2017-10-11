@@ -418,7 +418,6 @@
 
 #define fastioWrite(pin, val) do {\
 	_FIO_PORT_##pin = (_FIO_PORT_##pin & ~(1 << _FIO_BIT_##pin)) | (val << _FIO_BIT_##pin);\
-	_FIO_PORT_##pin |= (val << _FIO_BIT_##pin);\
 } while(0)
 
 #define fastioRead(pin) ((_FIO_PIN_##pin >> _FIO_BIT_##pin) & 0x1)
