@@ -20,7 +20,7 @@ covered in standard arduino implementation. so there are also many new features 
 * *1/2 channel 8bit Digtial-to-Analog output, campatible with `analogWrite()`*
 * *More standalone I/Os*
 
-###### *Fast_IO code snippets
+###### *Fast_IO code snippets*
 
 ```C
 void setup() {
@@ -37,7 +37,7 @@ void loop() {
 }
 ```
 
-###### *PWM code snippets
+###### *PWM code snippets*
 
 ```C
 void setup() {
