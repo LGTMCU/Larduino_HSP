@@ -21,40 +21,41 @@ covered in standard arduino implementation. so there are also many new features 
 * *More standalone I/Os*
 
 ###### *Fast_IO code snippets
-```
-	void setup() {
-		//set D10 to output
-		fastioMode(D10, OUTPUT);
 
-		// driver D10 to low level
-		fastioWrite(D10, LOW);
-	}
+```C
+void setup() {
+	//set D10 to output
+	fastioMode(D10, OUTPUT);
 
-	void loop() {
-		// toggle D10
-		fastioToggle(D10);
-	}
+	// driver D10 to low level
+	fastioWrite(D10, LOW);
+}
+
+void loop() {
+	// toggle D10
+	fastioToggle(D10);
+}
 ```
 
 ###### *PWM code snippets
 
-```
-	void setup() {
-		// usage: pwmMode(pin, pwm_mode, freq_mode)
-		// PWM_MODE_SOLO: set pwm of D5/D6 to independent mode
-		// PWM_FREQ_FAST: set PWM to fast mode 
-		pwmMode(D5, PWM_MODE_SOLO, PWM_FREQ_FAST);
+```C
+void setup() {
+	// usage: pwmMode(pin, pwm_mode, freq_mode)
+	// PWM_MODE_SOLO: set pwm of D5/D6 to independent mode
+	// PWM_FREQ_FAST: set PWM to fast mode 
+	pwmMode(D5, PWM_MODE_SOLO, PWM_FREQ_FAST);
 
-		// usage: pwmResolution(pin, res_bits)
-		pwmResolution(D5, 7);
-		// or we can set PWM frequency directly
-		// usage: pwmFrequency(pin, freq_in_hz)
-		// pwmFrequency(D5, 500000);
- 
-		// usage: pwmWrite(pin, duty)
-		pwmWrite(D5, 128 >> 1);
-		pwmWrite(D6, 128 >> 2);
-	}
+	// usage: pwmResolution(pin, res_bits)
+	pwmResolution(D5, 7);
+	// or we can set PWM frequency directly
+	// usage: pwmFrequency(pin, freq_in_hz)
+	// pwmFrequency(D5, 500000);
+
+	// usage: pwmWrite(pin, duty)
+	pwmWrite(D5, 128 >> 1);
+	pwmWrite(D6, 128 >> 2);
+}
 ```
 
 > More detail will be documented in comming Wiki page
