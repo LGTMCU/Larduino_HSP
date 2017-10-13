@@ -5,7 +5,9 @@
 
 - [x] PWM & Timers update
 - [x] Fast_IO update
+- [ ] Analog Comparator
 - [ ] Differential Amplifier update 
+- [ ] Computation Accelerator
 
 ### Summary
 Larduino_HSP is 3'rd party hardware support package for LGT8F core based arduino boards.<br>
