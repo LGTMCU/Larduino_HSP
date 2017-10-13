@@ -70,13 +70,13 @@ int dutyMax;
 
 void setup() {
 	// usage: pwmMode(pin, pwm_mode, freq_mode)
-	// PWM_MODE_DUO0: set pwm of D5/D6 to DUO0 mode (complementary)
+	// PWM_MODE_DUO1: set pwm of D5/D6 to DUO1 mode (complementary)
 	// PWM_FREQ_FAST: set PWM to fast mode
 	// PWM_FREQ_BOOST: boost frequency by x4
 	// deadBand: set dead-band cycle for PWM 
-	pwmMode(D5, PWM_MODE_DUO0, PWM_FREQ_FAST|PWM_FREQ_BOOST, deadBand);
+	pwmMode(D5, PWM_MODE_DUO1, PWM_FREQ_FAST|PWM_FREQ_BOOST, deadBand);
 
-	// or we can set PWM frequency directly
+	// we can set PWM frequency directly
 	// usage: pwmFrequency(pin, freq_in_hz)
 	// set PWM frequency to 300KHz, return its duty resolution
 	dutyMax = pwmFrequency(D5, 300000);
