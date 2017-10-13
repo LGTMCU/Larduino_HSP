@@ -82,7 +82,7 @@ void setup() {
 	dutyMax = pwmFrequency(D5, 300000);
 
 	// usage: pwmWrite(pin, duty)
-	// Note that we have set PWM resolution to 7bit
+	// Note: maximum duty is calcuated when set pwm frequency
 	pwmWrite(D5, dutyMax >> 2);
 	pwmWrite(D6, dutyMax >> 2);
 }
