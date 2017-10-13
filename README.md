@@ -38,7 +38,7 @@ void loop() {
 }
 ```
 
-##### *PWM code snippetsn : Solo mode*
+##### *PWM code snippets : Solo mode*
 
 ```C
 void setup() {
@@ -61,7 +61,7 @@ void setup() {
 }
 ```
 
-##### *PWM code snippetsn : Duo/Complementary mode*
+##### *PWM code snippets : Duo/Complementary mode*
 
 ```C
 // dead-band settings for complementary PWM
