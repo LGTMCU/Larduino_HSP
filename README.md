@@ -117,5 +117,5 @@ Here is the default sketchbook directory for most popluar system:
 ### Arduino Board based on LGT8F's
 Here we list one remarkable arduino board based on LGT8F, which is designed by **[OCROBOT](http://www.ocrobot.com/doku.php?id=start)**<br>
 [ALPHA 8F382P-U](http://www.ocrobot.com/doku.php?id=ocrobot:alpha:8f328p-u:main) stick, with USB to UART on board. You can afford it just of **RMB 8.00**. <br>
-![](http://www.ocrobot.com/lib/exe/fetch.php?w=400&tok=4f133f&media=ocrobot:alpha:8f328p-u:328p-u%E4%BE%A7%E9%9D%A2435.png)<br>
+![](http://www.ocrobot.com/lib/exe/fetch.php?w=400&tok=4f133f&media=zh:ocrobot:alpha:8f328p-u:328p-u%E4%BE%A7%E9%9D%A2435.png)<br>
 Please follow **[OCROBOT ALPHA 8F832P-U](http://www.ocrobot.com/doku.php?id=ocrobot:alpha:8f328p-u:main)** official page for more details.
