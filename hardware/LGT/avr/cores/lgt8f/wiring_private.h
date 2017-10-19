@@ -41,25 +41,6 @@ extern "C"{
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-// Log(HSP v3.7):
-//  - for system tick based on timer 2
-#if defined(TIFR) && defined(TOV2)
-#define stopTick() cbi(TIFR, TOV2)
-#elif defined(TIFR2) && defined(TOV2)
-#define stopTick() cbi(TIFR2, TOV2)
-#else
-#error  Timer2 overflow interrupt is not defined! 
-#endif
-
-#if defined(TIFR) && defined(TOV2)
-#define startTick() sbi(TIFR, TOV2)
-#elif defined(TIFR2) && defined(TOV2)
-#define startTick() sbi(TIFR2, TOV2)
-#else
-#error  Timer2 overflow interrupt is not defined! 
-#endif
-// Log(HSP v3.7): END
-
 uint32_t countPulseASM(volatile uint8_t *port, uint8_t bit, uint8_t stateMask, unsigned long maxloops);
 
 #define EXTERNAL_INT_0 0

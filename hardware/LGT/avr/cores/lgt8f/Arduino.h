@@ -319,6 +319,25 @@ void pwmMode(uint8_t pin, uint8_t wmode, uint8_t fmode = PWM_FREQ_FAST, uint8_t 
 #define	EXT_OSC	1
 void sysClock(uint8_t mode);
 
+// Log(HSP v3.7):
+//  - for system tick based on timer 2
+#if defined(TIMSK) && defined(TOIE2)
+#define stopTick() do { TIMSK &= ~_BV(TOIE2); } while(0)
+#elif defined(TIMSK2) && defined(TOIE2)
+#define stopTick() do { TIMSK2 &= ~_BV(TOIE2); } while(0)
+#else
+#error  Timer2 overflow interrupt is not defined! 
+#endif
+
+#if defined(TIMSK) && defined(TOIE2)
+#define startTick() do { TIMSK |= _BV(TOIE2); } while(0)
+#elif defined(TIMSK2) && defined(TOIE2)
+#define startTick() do { TIMSK |= _BV(TOIE2); } while(0)
+#else
+#error  Timer2 overflow interrupt is not defined! 
+#endif
+// Log(HSP v3.7): END
+
 #endif
 
 #ifndef nop

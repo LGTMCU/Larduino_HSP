@@ -26,8 +26,7 @@ public:
     uchar   i;
 
     // disable system tick interrupt (used for millis)
-    //TIMSK0 = 0;
-    stopTick();
+    TIMSK2 = 0;
 
     usbInit();
       
