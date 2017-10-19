@@ -5,13 +5,15 @@
 
 - [x] PWM & Timers update
 - [x] Fast_IO update
+- [ ] Analog Comparator
 - [ ] Differential Amplifier update 
+- [ ] Computation Accelerator
 
 ### Summary
 Larduino_HSP is 3'rd party hardware support package for LGT8F core based arduino boards.<br>
 The backend of **HSP** fork from offical arduino distribution. We have try to keep all the standard <br>
 features compatible with arduino world. So feel free to resuse all of the libraries which designed for arduino platform.<br><br>
-Microcontroller, based on LGT8F, e.g LGT8F328P has more advanced features which not <br>
+Microcontroller based on LGT8F, e.g LGT8F328P has more advanced features which not <br>
 covered in standard arduino implementation. so there are also many new features merged to this<br> 3'rd party package. Important update and new features as following:<br>
 
 * *External/Internal crystal can be selected at runtime*
@@ -21,7 +23,7 @@ covered in standard arduino implementation. so there are also many new features 
 * *1/2 channel 8bit Digtial-to-Analog output, campatible with `analogWrite()`*
 * *More standalone I/Os*
 
-###### *Fast_IO code snippets*
+##### *Fast_IO code snippets*
 
 ```C
 void setup() {
@@ -38,7 +40,7 @@ void loop() {
 }
 ```
 
-###### *PWM code snippets*
+##### *PWM code snippets : Solo mode*
 
 ```C
 void setup() {
@@ -60,6 +62,34 @@ void setup() {
 	pwmWrite(D6, 128 >> 2);
 }
 ```
+
+##### *PWM code snippets : Duo/Complementary mode*
+
+```C
+// dead-band settings for complementary PWM
+int deadBand = 8;
+int dutyMax;
+
+void setup() {
+	// usage: pwmMode(pin, pwm_mode, freq_mode)
+	// PWM_MODE_DUO1: set pwm of D5/D6 to DUO1 mode (complementary)
+	// PWM_FREQ_FAST: set PWM to fast mode
+	// PWM_FREQ_BOOST: boost frequency by x4
+	// deadBand: set dead-band cycle for PWM 
+	pwmMode(D5, PWM_MODE_DUO1, PWM_FREQ_FAST|PWM_FREQ_BOOST, deadBand);
+
+	// we can set PWM frequency directly
+	// usage: pwmFrequency(pin, freq_in_hz)
+	// set PWM frequency to 300KHz, return its duty resolution
+	dutyMax = pwmFrequency(D5, 300000);
+
+	// usage: pwmWrite(pin, duty)
+	// Note: maximum duty is calcuated when set pwm frequency
+	pwmWrite(D5, dutyMax >> 2);
+	pwmWrite(D6, dutyMax >> 2);
+}
+```
+
 
 > More detail will be documented in comming Wiki page
 
@@ -85,7 +115,7 @@ Here is the default sketchbook directory for most popluar system:
 | LINUX | /home/<Username\>/sketchbook |
 
 ### Arduino Board based on LGT8F's
-Here we list one remarkable arduino board based on LGT8F's core, which is designed by **[OCROBOT](http://www.ocrobot.com/doku.php?id=zh:start)**<br>
-[ALPHA 8F382P-U](http://www.ocrobot.com/doku.php?id=zh:ocrobot:alpha:8f328p-u:main) stick, with USB to UART on board. You can afford it just of **RMB 8.00**. <br>
-![](http://www.ocrobot.com/lib/exe/fetch.php?w=400&tok=4f133f&media=zh:ocrobot:alpha:8f328p-u:328p-u%E4%BE%A7%E9%9D%A2435.png)<br>
-Please follow **[OCROBOT ALPHA 8F832P-U](http://www.ocrobot.com/doku.php?id=zh:ocrobot:alpha:8f328p-u:main)** official page for more details.
+Here we list one remarkable arduino board based on LGT8F, which is designed by **[OCROBOT](http://www.ocrobot.com/doku.php?id=start)**<br>
+[ALPHA 8F382P-U](http://www.ocrobot.com/doku.php?id=ocrobot:alpha:8f328p-u:main) stick, with USB to UART on board. You can afford it just of **RMB 8.00**. <br>
+![](http://www.ocrobot.com/lib/exe/fetch.php?w=400&tok=f15324&media=ocrobot:alpha:8f328p-u:328p-u%E4%BE%A7%E9%9D%A2435.png)<br>
+Please follow **[OCROBOT ALPHA 8F832P-U](http://www.ocrobot.com/doku.php?id=ocrobot:alpha:8f328p-u:main)** official page for more details.
