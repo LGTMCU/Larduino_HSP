@@ -100,7 +100,7 @@ Larduino HSP is based on optiboot. Source can be found inside [bootloader direct
 	
 ### Installation:
 1. Unzip Larduino_HSP_vX.X.rar
-1. Copy [**sketches**], [**hardware**] and [**libraries**] directories to arduino's sketchbook direcotry
+1. Copy [**hardware**] directory to Arduino's sketchbook directory
 1. Restart Arduino, you will see new board from [**Tools**]->[**Border**] menu.
 
 ### About arduino's sketchbook directory
