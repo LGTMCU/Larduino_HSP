@@ -1,4 +1,4 @@
-### Ardunio Hardware Support Package for LGT8F's 
+# Arduino Hardware Support Package for LGT8F's 
 
 ### Task status
 
