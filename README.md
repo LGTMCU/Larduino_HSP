@@ -103,7 +103,7 @@ The Larduino HSP bootloader is based on optiboot. Source can be found inside the
 
 ### About arduino's sketchbook directory
 
-You can always find this directory via **[File]->[Preferences]** dialog. But here is the default sketchbook directory for most popluar system:
+You can always find this directory via the **[File]->[Preferences]** dialog. But here is the default sketchbook directory for most popluar system:
 
 | System | Path of sketchbook |
 | :----- | :----------------- |
