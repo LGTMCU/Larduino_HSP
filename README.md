@@ -112,7 +112,7 @@ You can always find this directory via the **[File]->[Preferences]** dialog. But
 | LINUX | /home/<Username\>/sketchbook |
 
 ### Arduino Board based on LGT8F's
-Here we list one remarkable arduino board based on LGT8F, which is designed by **[OCROBOT](http://www.ocrobot.com/doku.php?id=start)**, the [ALPHA 8F382P-U](http://www.ocrobot.com/doku.php?id=ocrobot:alpha:8f328p-u:main) stick, with USB to UART on board. You can afford it just of **RMB 8.00**.
+Here we list one remarkable arduino board based on the LGT8F, which is designed by **[OCROBOT](http://www.ocrobot.com/doku.php?id=start)**, the [ALPHA 8F382P-U](http://www.ocrobot.com/doku.php?id=ocrobot:alpha:8f328p-u:main) stick, with USB to UART on board. You can afford it just of **RMB 8.00**.
 
 ![](http://www.ocrobot.com/lib/exe/fetch.php?w=400&tok=f15324&media=ocrobot:alpha:8f328p-u:328p-u%E4%BE%A7%E9%9D%A2435.png)
 
